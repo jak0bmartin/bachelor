@@ -1,12 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Game</title>
-        <link rel="stylesheet" href="style.css">
-        <script src="script.js"></script>
-    </head>
-    <body>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chemie Game</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="game-panel">
+        <header class="game-header">
+          <h1>Chemie Quiz</h1>
+          <div class="status-row">
+            <div class="timer-label">Zeit: <span id="timer">–</span></div>
+          </div>
+        </header>
+
+        <section class="question-section">
+          <div id="question-text" class="question-text">Frage wird geladen…</div>
+          <div id="answers" class="answers"></div>
+        </section>
+
+        <section class="score-section">
+          <div class="score-bar">
+            <div id="score-fill" class="score-fill"></div>
+          </div>
+          <div id="motivator-text" class="motivator-text"></div>
+        </section>
+
+        <footer class="game-footer">
+          <div id="game-over" class="game-over"></div>
+        </footer>
+      </section>
+    </main>
+  </body>
 </html>
