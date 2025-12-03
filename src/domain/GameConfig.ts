@@ -3,20 +3,6 @@
 // Phasen des Spiels: Lernphase (keine Bewertung) und Testphase (Bewertung aktiv)
 export type Phase = 'LEARN' | 'TEST';
 
-// Eine Antwortoption zu einer Frage
-export interface AnswerOption {
-  id: number;
-  text: string;
-}
-
-// Eine Frage mit möglichen Antworten
-export interface Question {
-  id: number;
-  text: string;
-  options: AnswerOption[];
-  correctOptionId: number;
-}
-
 // Ergebnis einer kompletten Spielsitzung, nützlich für Auswertung und Logging
 export interface GameResult {
   won: boolean;
@@ -31,6 +17,7 @@ export interface GameConfig {
   secondsPerQuestion: number;
   totalQuestions: number;
 
+
   // Score-Skala (für den Balken)
   maxScorePercent: number;
   minScorePercent: number;
@@ -40,11 +27,17 @@ export interface GameConfig {
   scoreActiveInLearnPhase: boolean;       // laut Konzept: false
   phase2DeltaCorrect: number;             // Veränderung in Prozentpunkten bei korrekter Antwort
   phase2DeltaWrong: number;               // Veränderung in Prozentpunkten bei falscher Antwort
+  phase2TimeDecayPerSecond?: number;      // kontinuierlicher Punkteverlust pro Sekunde in Phase 2 (optional)
 
-  // Gewinn- / Verlustbedingungen
-  lossThresholdPercent: number;           // z.B. 0: wenn Score == 0 -> sofort verloren
-  winThresholdPercent: number;            // z.B. 50: „rechte Seite“ des Balkens
-  requiredAboveThresholdFraction: number; // z.B. 0.5: mind. 50 % der Zeit über winThresholdPercent
+  // Scorebedingungen
+  loseScoreThresholdPercent: number;           // z.B. 0: wenn Score == 0 -> sofort verloren
+  winScoreThresholdPercent: number;            // z.B. 50: „rechte Seite“ des Balkens
+  requiredScoreAboveThresholdFraction: number; // z.B. 0.5: mind. 50 % der Zeit über winThresholdPercent
+
+  // Sieg/Verlustbedingungen
+  initialPerformanceScore: number;
+  maxPerformanceScore: number;
+  minPerformanceScore: number;
 }
 
 // Konkrete Standardkonfiguration deines Spiels
@@ -59,37 +52,20 @@ export const GAME_CONFIG: GameConfig = {
   scoreActiveInLearnPhase: false,
   phase2DeltaCorrect: +10,
   phase2DeltaWrong: -10,
+  phase2TimeDecayPerSecond: -1,
 
-  lossThresholdPercent: 0,
-  winThresholdPercent: 50,
-  requiredAboveThresholdFraction: 0.5,
+  loseScoreThresholdPercent: 0,
+  winScoreThresholdPercent: 51,
+  requiredScoreAboveThresholdFraction: 0.5,
+
+  initialPerformanceScore: 0,
+  maxPerformanceScore: 100,
+  minPerformanceScore: 0,
 };
 
-// Beispielhafte Fragenliste (Platzhalter-Inhalte)
-// Du kannst hier deine echten Fragen eintragen; jede Frage wird in Phase 1 und Phase 2 verwendet.
-export const QUESTIONS: Question[] = [
-  {
-    id: 1,
-    text: 'Welches chemische Element ist Natrium?',
-    options: [
-      { id: 1, text: 'Gasförmiges Nichtmetall' },
-      { id: 2, text: 'Edelgas' },
-      { id: 3, text: 'Metall' },
-    ],
-    correctOptionId: 3,
-  },
-  {
-    id: 2,
-    text: 'Welche Aussage über Edelgase trifft zu?',
-    options: [
-      { id: 1, text: 'Sie sind sehr reaktiv.' },
-      { id: 2, text: 'Sie sind weitgehend reaktionsträge.' },
-      { id: 3, text: 'Sie sind nur in festen Verbindungen stabil.' },
-    ],
-    correctOptionId: 2,
-  },
-  // TODO: weitere Fragen ergänzen (bis totalQuestions erreicht ist)
-];
+export const getTotalTestDurationMs = (config: Pick<GameConfig, 'secondsPerQuestion'|'totalQuestions'>) =>
+  config.secondsPerQuestion * config.totalQuestions * 1000;
+
 
 // Hilfsfunktion: wendet die Score-Regel aus dem Konfigurationsdokument an
 export function applyAnswerScore(
@@ -116,5 +92,5 @@ export function applyAnswerScore(
 
 // Hilfsfunktion: prüft sofortige Verlustbedingung
 export function isImmediateLoss(scorePercent: number, config: GameConfig = GAME_CONFIG): boolean {
-  return scorePercent <= config.lossThresholdPercent;
+  return scorePercent <= config.loseScoreThresholdPercent;
 }

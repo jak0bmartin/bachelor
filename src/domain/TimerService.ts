@@ -26,5 +26,14 @@ export class TimerService {
     const remaining = this.secondsPerQuestion - Math.floor(elapsedMs / 1000);
     return Math.max(0, remaining);
   }
-}
 
+  getRemainingFraction(): number {
+    if (!this.questionStartedAt) {
+      return 1;
+    }
+    const elapsedMs = this.now() - this.questionStartedAt;
+    const remainingMs = this.secondsPerQuestion * 1000 - elapsedMs;
+    const fraction = remainingMs / (this.secondsPerQuestion * 1000);
+    return Math.max(0, Math.min(1, fraction));
+  }
+}

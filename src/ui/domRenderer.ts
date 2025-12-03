@@ -1,38 +1,58 @@
-import { Question } from '../domain/GameConfig';
+import { Phase} from '../domain/GameConfig';
+import { Question } from '../domain/Questions';
+import { DomView } from './DomView';
 
-type Hooks = {
-  onShowQuestion?: (question: Question) => void;
-  onUpdateTimer?: (seconds: number) => void;
-  onUpdateScore?: (percent: number) => void;
-  onUpdateMotivator?: (percent: number) => void;
-  onShowGameOver?: (won: boolean) => void;
+type UIEvents = {
+  onAnswerSelected?: (optionId: number) => void;
+  onSkipLearn?: () => void;
 };
 
 /**
- * Thin abstraction that forwards UI events to provided callbacks.
- * Keeps GameSession decoupled from the concrete rendering layer (DOM, React, etc.).
+ * Thin abstraction over DomView. Exposes UI operations to the controller
+ * and forwards user events back via callbacks.
  */
 export class UIRenderer {
-  constructor(private readonly hooks: Hooks = {}) {}
+  private readonly view: DomView;
 
-  showQuestion(question: Question): void {
-    this.hooks.onShowQuestion?.(question);
+  constructor(events: UIEvents = {}) {
+    this.view = new DomView();
+    this.view.setAnswerHandler((optionId) => events.onAnswerSelected?.(optionId));
+    this.view.onSkipLearn = events.onSkipLearn;
   }
 
-  updateTimer(seconds: number): void {
-    this.hooks.onUpdateTimer?.(seconds);
+  showQuestion(question: Question): void {
+    this.view.renderQuestion(question);
+  }
+
+  showCorrectAnswerIndex(correctOptionId: number): void {
+    this.view.renderCorrectAnswerIndex(correctOptionId);
+  }
+
+  updateQuestionIndex(current: number, total: number): void {
+    this.view.renderQuestionIndex(current, total);
+  }
+
+  updatePhase(phase: Phase): void {
+    this.view.renderPhase(phase);
+  }
+
+  updateTimer(seconds: number, fraction: number): void {
+    this.view.renderTimer(seconds, fraction);
   }
 
   updateScore(percent: number): void {
-    this.hooks.onUpdateScore?.(percent);
+    this.view.renderScore(percent);
   }
 
   updateMotivator(percent: number): void {
-    this.hooks.onUpdateMotivator?.(percent);
+    this.view.renderMotivator(percent);
+  }
+
+  updateTimeAbove(secondsAbove: number, fraction: number): void {
+    this.view.renderTimeAbove(secondsAbove, fraction);
   }
 
   showGameOver(won: boolean): void {
-    this.hooks.onShowGameOver?.(won);
+    this.view.renderGameOver(won);
   }
 }
-

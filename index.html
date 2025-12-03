@@ -4,16 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chemie Game</title>
-    <link rel="stylesheet" href="style.css" />
-    <script type="module" src="./src/main.ts"></script>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
     <main class="game-shell">
-      <section class="game-panel">
+      <section class="left-panel">
         <header class="game-header">
-          <h1>Chemie Quiz</h1>
+          <div>
+            <h1>Chemie Quiz</h1>
+            <div class="meta-row">
+              <span id="phase-label">Phase: –</span>
+              <span id="question-index-label">Frage: –/–</span>
+            </div>
+          </div>
+          
           <div class="status-row">
-            <div class="timer-label">Zeit: <span id="timer">–</span></div>
+            <div class="timer-clock" aria-label="Restzeit"><span id="timer">–</span></div>
+            <button id="skip-learn-button" class="skip-button" type="button">Lernphase überspringen</button>
           </div>
         </header>
 
@@ -27,11 +35,21 @@
             <div id="score-fill" class="score-fill"></div>
           </div>
           <div id="motivator-text" class="motivator-text"></div>
+          <div id="time-above-info" class="time-above-info">
+            Zeit ≥ 50%: – s (– %)
+          </div>
         </section>
+        <!-- -->
 
         <footer class="game-footer">
           <div id="game-over" class="game-over"></div>
         </footer>
+      </section>
+
+      <section class="right-panel">
+        <div class="mood-wrapper">
+          <img id="mood-image" class="mood-image" src="" alt="Stimmungsbild von Marie Curie" />
+        </div>
       </section>
     </main>
   </body>
