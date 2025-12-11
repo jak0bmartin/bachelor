@@ -1,4 +1,4 @@
-import { GameConfig, Phase, applyAnswerScore, isImmediateLoss, GAME_CONFIG } from './GameConfig';
+import { GameConfig, Phase, applyAnswerScore, isImmediateLoss, GAME_CONFIG } from '../data/GameConfig';
 
 /**
  * Handles score progression based on the active phase and answer correctness.

@@ -37,7 +37,7 @@ export class TimerService {
     }
     const elapsedMs = this.now() - this.questionStartedAt;
     const remainingMs = this.secondsPerQuestion * 1000 - elapsedMs;
-    const fraction = remainingMs / (this.secondsPerQuestion * 1000);
-    return Math.max(0, Math.min(1, fraction));
+    const percentValue = remainingMs / (this.secondsPerQuestion * 1000);
+    return Math.max(0, Math.min(1, percentValue));
   }
 }

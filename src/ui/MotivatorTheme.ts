@@ -1,5 +1,5 @@
 // theme.ts (oder in DomView/domRenderer)
-import { GameMode } from '../domain/GameConfig';
+import { GameMode } from '../data/GameConfig';
 
 export type MotivatorTheme = {
   label: string;

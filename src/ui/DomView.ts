@@ -1,7 +1,14 @@
-import { Question } from '../domain/Questions';
-import { GameMode } from '../domain/GameConfig';
+import { Question } from '../data/Questions';
+import { GameMode } from '../data/GameConfig';
 import { MotivatorTheme, MOTIVATOR_THEMES } from './MotivatorTheme';
-import { GAME_CONFIG } from '../domain/GameConfig';
+import { GAME_CONFIG } from '../data/GameConfig';
+
+
+type UIEvents = {
+  onAnswerSelected?: (optionId: number) => void;
+  onSkipLearn?: () => void;
+  onGameModeSelected?: (mode: GameMode) => void;
+};
 
 /**
  * Handles all DOM updates and user interaction bindings.

@@ -1,10 +1,10 @@
-import { GAME_CONFIG } from '../domain/GameConfig';
-import { GameConfig, Phase, GameMode } from '../domain/GameConfig';
-import { Question, QUESTIONS } from '../domain/Questions';
-import { ScoreSystem } from '../domain/ScoreSystem';
-import { TimerService } from '../domain/TimerService';
-import { UIRenderer } from '../ui/domRenderer';
-import { PerformanceTracker } from '../domain/PerformanceTracker';
+import { GAME_CONFIG } from '../data/GameConfig';
+import { GameConfig, Phase, GameMode } from '../data/GameConfig';
+import { Question, QUESTIONS } from '../data/Questions';
+import { ScoreSystem } from './ScoreSystem';
+import { TimerService } from './TimerService';
+import { DomView } from '../ui/DomView';
+import { PerformanceTracker } from './PerformanceTracker';
 
 
 /**
@@ -15,7 +15,7 @@ export class GameController {
   private readonly scoreSystem: ScoreSystem;
   private readonly performanceTracker: PerformanceTracker;
   private readonly timer: TimerService;
-  private readonly ui: UIRenderer;
+  private readonly ui: DomView;
   private readonly now: () => number;
   private readonly BLUR_TIME_MS = 3000;
 
@@ -37,15 +37,14 @@ export class GameController {
   private blurTimeoutId: number | null = null;
 
   constructor() {
-    this.ui = new UIRenderer({
-      onAnswerSelected: (optionId) => this.answerCurrent(optionId),
-      onSkipLearn: () => this.skipLearnPhase(),
-      onGameModeSelected: (mode: GameMode) => {
-        this.mode = mode;
-        this.ui.showGameShell(mode);
-        this.start();
-      }
-    });
+    this.ui = new DomView();
+    this.ui.setAnswerHandler((optionId) => this.answerCurrent(optionId));
+    this.ui.onSkipLearn = () => this.skipLearnPhase();
+    this.ui.onGameModeSelected = (mode: GameMode) => {
+      this.mode = mode;
+      this.ui.renderGameShell(mode);
+      this.start();
+    };
     this.config = GAME_CONFIG;
     this.now = (() => Date.now());
     this.questions = QUESTIONS;
@@ -108,11 +107,11 @@ export class GameController {
     if(!isCorrect) this.performanceTracker.removeTimeAbove(10000);
 
     this.scoreSystem.applyAnswer(isCorrect, this.currentPhase);
-    this.ui.updateScore(this.scoreSystem.getScorePercent());
-    this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
+    this.ui.renderScore(this.scoreSystem.getScorePercent());
+    this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
     this.questionCompleted = true;
-    this.ui.showCorrectAnswerIndex(question.correctOptionId);
+    this.ui.renderCorrectAnswerIndex(question.correctOptionId);
     this.finalizeQuestionTime();
 
     if (this.scoreSystem.isImmediateLoss()) {
@@ -129,10 +128,10 @@ export class GameController {
     if (this.blurTimeoutId !== null) {
       clearTimeout(this.blurTimeoutId);
     }
-    this.ui.setBlur();
+    this.ui.renderBlurEffect();
     this.pausedUntil = this.now() + this.BLUR_TIME_MS;
     this.blurTimeoutId = window.setTimeout(() => {
-      this.ui.setBlur();
+      this.ui.renderBlurEffect();
       this.pausedUntil = 0;
       this.blurTimeoutId = null;
       this.timer.reStartQuesionTimer();
@@ -205,8 +204,8 @@ export class GameController {
     // kontinuierlicher Punkteabzug nur in der Prüfphase
     if (!this.gameOver && !this.questionCompleted && this.currentPhase === 'TEST') {
       this.scoreSystem.applyTimeDecay(decayDeltaSeconds, this.currentPhase);
-      this.ui.updateScore(this.scoreSystem.getScorePercent());
-      this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
+      this.ui.renderScore(this.scoreSystem.getScorePercent());
+      this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
       if (this.scoreSystem.isImmediateLoss()) {
         this.endGame();
@@ -215,21 +214,21 @@ export class GameController {
     }
 
     const remainingTime = this.timer.getRemainingSeconds();
-    this.ui.updateTimer(remainingTime, this.timer.getRemainingFraction());
+    this.ui.renderTimer(remainingTime, this.timer.getRemainingFraction());
 
     if (remainingTime === 0 && !this.gameOver && !this.questionCompleted) {
       // Timeout ohne Antwort: wie falsche Antwort werten
       if(!this.gameOver)this.blur();
       const question = this.questions[this.currentQuestionIndex];
       this.scoreSystem.applyAnswer(false, this.currentPhase);
-      this.ui.updateScore(this.scoreSystem.getScorePercent());
-      this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
+      this.ui.renderScore(this.scoreSystem.getScorePercent());
+      this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
       this.performanceTracker.removeTimeAbove(10000);
       
       this.questionCompleted = true;
       if (question) {
-        this.ui.showCorrectAnswerIndex(question.correctOptionId);
+        this.ui.renderCorrectAnswerIndex(question.correctOptionId);
       }
       this.finalizeQuestionTime();
 
@@ -245,12 +244,12 @@ export class GameController {
   private pushQuestionToUI(): void {
     if(this.now() < this.pausedUntil ) return;
     const question = this.questions[this.currentQuestionIndex];
-    this.ui.showQuestion(question);
-    this.ui.updateQuestionIndex(this.currentQuestionIndex + 1, this.questions.length);
-    this.ui.updatePhase(this.currentPhase);
-    this.ui.updateTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
-    this.ui.updateScore(this.scoreSystem.getScorePercent());
-    this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
+    this.ui.renderQuestion(question);
+    this.ui.renderQuestionIndex(this.currentQuestionIndex + 1, this.questions.length);
+    this.ui.renderPhase(this.currentPhase);
+    this.ui.renderTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
+    this.ui.renderScore(this.scoreSystem.getScorePercent());
+    this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
     this.pushTimeAboveToUI();
   }
 
@@ -261,7 +260,7 @@ export class GameController {
     this.trackTimeSample();
     this.finalizeQuestionTime();
     this.clearPendingNextQuestion();
-    this.ui.showGameOver(won, this.mode);
+    this.ui.renderGameOver(won, this.mode);
   }
 
   private trackTimeSample(): void {
@@ -296,7 +295,7 @@ export class GameController {
     //let secondsAbove = this.toSeconds(this.timeAboveThresholdMs);
     let secondsAbove = this.toSeconds(this.performanceTracker.getPerformanceScoreSeconds());
     const fraction = this.performanceTracker.getTimeAboveThresholdFraction();
-    this.ui.updateTimeAbove(secondsAbove, fraction);
+    this.ui.renderTimeAbove(secondsAbove, fraction);
   }
 
   private scheduleNextQuestion(): void {

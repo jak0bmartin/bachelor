@@ -1,4 +1,4 @@
-import { GameConfig, GAME_CONFIG, getTotalTestDurationMs } from './GameConfig';
+import { GameConfig, GAME_CONFIG, getTotalTestDurationMs } from '../data/GameConfig';
 
 
 export class PerformanceTracker {
