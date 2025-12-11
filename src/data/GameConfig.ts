@@ -49,7 +49,7 @@ export interface GameConfig {
 // Konkrete Standardkonfiguration deines Spiels
 export const GAME_CONFIG: GameConfig = {
   secondsPerQuestion: 10,
-  totalQuestions: 8,
+  totalQuestions: 10,
 
   maxScorePercent: 100,
   minScorePercent: 0,

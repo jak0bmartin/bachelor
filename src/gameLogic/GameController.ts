@@ -72,7 +72,7 @@ export class GameController {
     //this.startLoop();
   }
 
-  stop(): void {
+  stopGameloop(): void {
     if (this.tickIntervalId !== null) {
       clearInterval(this.tickIntervalId);
       this.tickIntervalId = null;
@@ -93,9 +93,11 @@ export class GameController {
 
 
   private startGameLoop(): void {
-    this.stop();
+    this.stopGameloop();
     this.tickIntervalId = window.setInterval(() => {
       this.ui.renderTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
+      this.performanceTracker.changePerformanceScore(this.scoreSystem.getScorePercent());
+      this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
       if (!this.timer.hasTimeLeft()) {
         this.processAnswer(-1);
       }
@@ -113,7 +115,7 @@ export class GameController {
   }
 
   processAnswer(optionId: number) {
-    this.stop();
+    this.stopGameloop();
     this.questionAnswered = true;
     this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
     this.scoreSystem.applyAnswer(this.questionHandler.getCorrectAnswer() == optionId, 'TEST');
@@ -320,7 +322,7 @@ export class GameController {
 
   private pushTimeAboveToUI(): void {
     //let secondsAbove = this.toSeconds(this.timeAboveThresholdMs);
-    let secondsAbove = this.toSeconds(this.performanceTracker.getPerformanceScoreSeconds());
+    let secondsAbove = this.toSeconds(this.performanceTracker.getPerformanceScoreMs());
     const fraction = this.performanceTracker.getTimeAboveThresholdFraction();
     this.ui.renderTimeAbove(secondsAbove, fraction);
   }

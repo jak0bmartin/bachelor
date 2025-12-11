@@ -7,17 +7,29 @@ export class PerformanceTracker {
     readonly gameDurationMs: number;
     readonly winThresholdPercent: number;
 
-    private currentPerformanceScoreSeconds: number; //Zeit die jenseits der >=51% verbracht wurde abzgl. der Zeit, die < 51 verbracht wurde
+    private lastCallTime = 0;
+    private readonly now: () => number = () => Date.now();
+
+    private currentPerformanceScoreMs: number; // Zeit in ms, die über der Schwelle verbracht wurde
 
     constructor(private readonly config: GameConfig = GAME_CONFIG) {
         this.maxPerformanceScore = config.maxPerformanceScore;
         this.minPerformanceScore = config.minPerformanceScore;
-        this.currentPerformanceScoreSeconds = config.initialPerformanceScore;
+        this.currentPerformanceScoreMs = config.initialPerformanceScore;
         this.gameDurationMs = getTotalTestDurationMs(config);
         this.winThresholdPercent = config.winScoreThresholdPercent;
+        this.lastCallTime = this.now();
     }
 
-    public changePerformanceScore(timeClamped: number, currentScorePercent: number, currentQuestionTrackedMs: number): void {
+    public changePerformanceScore(currentScore: number){
+        let extraSecondsAboveThreshold = 0;
+        if(this.lastCallTime != 0) extraSecondsAboveThreshold = this.now() - this.lastCallTime;
+        this.lastCallTime = this.now();
+        //console.log("extraSecondsAboveThreshold:",extraSecondsAboveThreshold);
+        if(currentScore >= this.winThresholdPercent) this.addTimeAbove(extraSecondsAboveThreshold);
+    }
+
+    /*public changePerformanceScore(timeClamped: number, currentScorePercent: number, currentQuestionTrackedMs: number): void {
 
 
         if (currentScorePercent > this.winThresholdPercent) {
@@ -28,45 +40,50 @@ export class PerformanceTracker {
             this.removeTimeAbove(timeClamped);
         }
 
-    }
+    }*/
 
     public getPerformanceScore(): number{
         return this.getTimeAboveThresholdFraction() * 100;
     }
 
     public getTimeAboveThresholdFraction(): number {
-        const fullTestDurationMs = (getTotalTestDurationMs(this.config)) / 1000;
+        const fullTestDurationMs = getTotalTestDurationMs(this.config);
         if (fullTestDurationMs === 0) {
             return 0;
         }
-        return Math.min(1, (this.currentPerformanceScoreSeconds / 1000) / fullTestDurationMs);
+        console.log("ergebnis", Math.min(1, this.currentPerformanceScoreMs / fullTestDurationMs));
+        return Math.min(1, this.currentPerformanceScoreMs / fullTestDurationMs);
     }
 
-    public getPerformanceScoreSeconds(): number {
-        return this.currentPerformanceScoreSeconds;
+    public getPerformanceScoreMs(): number {
+        return this.currentPerformanceScoreMs;
     }
 
     public addTimeAbove(time: number): void {
        if( (this.getTimeAboveThresholdFraction() *100) < 60)
-        this.currentPerformanceScoreSeconds += time /*/ this.gameDurationMs * 100*/;
+        this.currentPerformanceScoreMs += time;
         this.checkIfInvalidScore();
+
+        console.log("this.currentPerformanceScoreMs: ",this.currentPerformanceScoreMs);
+        console.log("time", time);
     }
 
     public removeTimeAbove(time: number): void {
-        this.currentPerformanceScoreSeconds -= time /*/ this.gameDurationMs * 100*/;
+        this.currentPerformanceScoreMs -= time;
         this.checkIfInvalidScore();
     }
 
     public reset(): void {
-        this.currentPerformanceScoreSeconds = 0;
+        this.currentPerformanceScoreMs = 0;
+        this.lastCallTime = this.now();
     }
 
     private checkIfInvalidScore(): void {
-        if (this.currentPerformanceScoreSeconds < 0)
-            this.currentPerformanceScoreSeconds = 0;
-        else if(this.currentPerformanceScoreSeconds > getTotalTestDurationMs(this.config))
-            this.currentPerformanceScoreSeconds = getTotalTestDurationMs(this.config);
+        if (this.currentPerformanceScoreMs < 0)
+            this.currentPerformanceScoreMs = 0;
+        else if(this.currentPerformanceScoreMs > getTotalTestDurationMs(this.config))
+            this.currentPerformanceScoreMs = getTotalTestDurationMs(this.config);
         else if((this.getTimeAboveThresholdFraction() *100) > 60)
-            this.currentPerformanceScoreSeconds = getTotalTestDurationMs(this.config) *0.6;
+            this.currentPerformanceScoreMs = getTotalTestDurationMs(this.config) *0.6;
     }
 }

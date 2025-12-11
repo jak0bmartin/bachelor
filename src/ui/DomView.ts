@@ -277,9 +277,9 @@ export class DomView {
   }
 
   renderTimeAbove(secondsAbove: number, fraction: number): void {
-    const percent = (fraction * 100).toFixed(0);
+    const percent = (fraction).toFixed(0);
     this.timeAboveEl.textContent = `Zeit ≥ 50%: ${secondsAbove.toFixed(1)} s (${percent} %)`;
-    const percentNumber = (fraction * 100);
+    const percentNumber = (fraction);
     if (percentNumber < 49)
       this.performanceFillEl.style.height = `${2 * percentNumber}%`;
     switch (true) {
