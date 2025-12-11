@@ -1,10 +1,11 @@
-import { Phase} from '../domain/GameConfig';
+import { Phase, GameMode} from '../domain/GameConfig';
 import { Question } from '../domain/Questions';
 import { DomView } from './DomView';
 
 type UIEvents = {
   onAnswerSelected?: (optionId: number) => void;
   onSkipLearn?: () => void;
+  onGameModeSelected?: (mode: GameMode) => void;
 };
 
 /**
@@ -18,6 +19,11 @@ export class UIRenderer {
     this.view = new DomView();
     this.view.setAnswerHandler((optionId) => events.onAnswerSelected?.(optionId));
     this.view.onSkipLearn = events.onSkipLearn;
+    this.view.onGameModeSelected = events.onGameModeSelected;
+  }
+
+  showGameShell(mode: GameMode): void{
+    this.view.renderGameShell(mode);
   }
 
   showQuestion(question: Question): void {
@@ -44,15 +50,19 @@ export class UIRenderer {
     this.view.renderScore(percent);
   }
 
-  updateMotivator(percent: number): void {
-    this.view.renderMotivator(percent);
+  updateMotivator(percent: number, mode: GameMode): void {
+    this.view.renderMotivator(percent, mode);
   }
 
   updateTimeAbove(secondsAbove: number, fraction: number): void {
     this.view.renderTimeAbove(secondsAbove, fraction);
   }
 
-  showGameOver(won: boolean): void {
-    this.view.renderGameOver(won);
+  showGameOver(won: boolean, mode: GameMode): void {
+    this.view.renderGameOver(won, mode);
+  }
+
+  setBlur(): void{
+    this.view.renderBlurEffect();
   }
 }

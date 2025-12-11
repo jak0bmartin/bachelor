@@ -25,7 +25,7 @@ export class ScoreSystem {
   /**
    * Kontinuierlicher Score-Abbau in der Prüfphase, z.B. -1 % pro Sekunde.
    */
-  /*applyTimeDecay(deltaSeconds: number, phase: Phase): void {
+  applyTimeDecay(deltaSeconds: number, phase: Phase): void {
     if (phase !== 'TEST') {
       return;
     }
@@ -35,7 +35,7 @@ export class ScoreSystem {
     }
     const next = this.currentScore + decayPerSecond * deltaSeconds;
     this.currentScore = Math.max(this.minScore, Math.min(this.maxScore, next));
-  }*/
+  }
 
   getScorePercent(): number {
     return this.currentScore;

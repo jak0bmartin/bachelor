@@ -11,6 +11,12 @@ export interface GameResult {
   timeAboveThresholdFraction: number;     // Anteil der Zeit über winThresholdPercent (0–1)
 }
 
+export enum GameMode {
+  TROPHY = 'Trophy',
+  TERMINATOR = 'Terminator',
+  MARIE = 'Marie',
+}
+
 // Zentrale Spielkonfiguration, direkt aus dem Scoring-Konzept abgeleitet
 export interface GameConfig {
   // Ablauf
@@ -59,7 +65,7 @@ export const GAME_CONFIG: GameConfig = {
   requiredScoreAboveThresholdFraction: 0.5,
 
   initialPerformanceScore: 0,
-  maxPerformanceScore: 100,
+  maxPerformanceScore: 60,
   minPerformanceScore: 0,
 };
 

@@ -9,8 +9,12 @@ export class TimerService {
     private readonly now: () => number = () => Date.now(),
   ) {}
 
-  startQuestion(): void {
+  startQuestionTimer(): void {
     this.questionStartedAt = this.now();
+  }
+
+  reStartQuesionTimer(): void{
+    this.startQuestionTimer();
   }
 
   hasTimeLeft(): boolean {

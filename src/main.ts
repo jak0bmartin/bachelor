@@ -2,7 +2,6 @@ import { GameController } from './game/GameController';
 
 function setup() {
     const controller = new GameController();
-    controller.start();
 }
 
 if (document.readyState === 'loading') {

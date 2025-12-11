@@ -1,56 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chemie Game</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script type="module" src="/src/main.ts"></script>
-  </head>
-  <body>
-    <main class="game-shell">
-      <section class="left-panel">
-        <header class="game-header">
-          <div>
-            <h1>Chemie Quiz</h1>
-            <div class="meta-row">
-              <span id="phase-label">Phase: –</span>
-              <span id="question-index-label">Frage: –/–</span>
-            </div>
-          </div>
-          
-          <div class="status-row">
-            <div class="timer-clock" aria-label="Restzeit"><span id="timer">–</span></div>
-            <button id="skip-learn-button" class="skip-button" type="button">Lernphase überspringen</button>
-          </div>
-        </header>
 
-        <section class="question-section">
-          <div id="question-text" class="question-text">Frage wird geladen…</div>
-          <div id="answers" class="answers"></div>
-        </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chemie Game</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script type="module" src="/src/main.ts"></script>
+</head>
 
-        <section class="score-section">
-          <div class="score-bar">
-            <div id="score-fill" class="score-fill"></div>
+<body>
+  <div id="menu-shell" class="menu-shell">
+    <div class="options">
+      <button id="game-mode-simple" class="game-mode-selector" type="button">Simple Gamification</button>
+      <button id="game-mode-terminator" class="game-mode-selector" type="button">Epic Cause: Terminator</button>
+      <button id="game-mode-marie" class="game-mode-selector" type="button">Authoritative Figure: Marie Curie</button>
+    </div>
+  </div>
+  <div id="game-shell" class="hidden game-shell">
+    <section class="left-panel" id="left-panel">
+      <header class="game-header">
+        <div>
+          <h1>Chemie Quiz</h1>
+          <div class="meta-row">
+            <span id="phase-label">Phase: –</span>
+            <span id="question-index-label">Frage: –/–</span>
           </div>
-          <div id="motivator-text" class="motivator-text"></div>
-          <div id="time-above-info" class="time-above-info">
-            Zeit ≥ 50%: – s (– %)
-          </div>
-        </section>
-        <!-- -->
+        </div>
 
-        <footer class="game-footer">
-          <div id="game-over" class="game-over"></div>
-        </footer>
+        <div class="status-row">
+          <div class="timer-clock" aria-label="Restzeit"><span id="timer">–</span></div>
+          <button id="skip-learn-button" class="skip-button" type="button">Lernphase überspringen</button>
+        </div>
+      </header>
+
+      <section class="question-section">
+        <div id="question-text" class="question-text">Frage wird geladen…</div>
+        <div id="answers" class="answers"></div>
       </section>
 
-      <section class="right-panel">
-        <div class="mood-wrapper">
-          <img id="mood-image" class="mood-image" src="" alt="Stimmungsbild von Marie Curie" />
+      <section class="score-section" id="score-section">
+        <div class="score-bar">
+          <div id="score-fill" class="score-fill"></div>
+        </div>
+        <div id="motivator-text" class="motivator-text"></div>
+        <div id="time-above-info" class="time-above-info">
+          Zeit ≥ 50%: – s (– %)
         </div>
       </section>
-    </main>
-  </body>
+      <!-- -->
+
+      <footer class="game-footer">
+        <div id="game-over" class="game-over"></div>
+      </footer>
+    </section>
+
+    <section class="right-panel">
+      <div class="motivator-wrapper">
+        <div class="performance-bar">
+          <div id="performance-fill" class="performance-fill"></div>
+        </div>
+        <img id="mood-image" class="mood-image" src="" />
+        <div id="terminator-wrapper" class="terminator-wrapper">
+          <div id="hydraulic-press" class="hydraulic-press">
+            <div id="pipe" class="pipe"></div>
+            <div id="press" class="press"></div>
+          </div>
+          <!--<img id="terminator-image" class="terminator-image" src="./assets/Terminator.jpg" />-->
+        </div>
+        <img id="trophy-image" class="trophy-image" src="./assets/trophy.svg" />
+      </div>
+    </section>
+  </div>
+</body>
+
 </html>

@@ -1,8 +1,7 @@
 import { GAME_CONFIG } from '../domain/GameConfig';
-import { GameConfig, Phase, } from '../domain/GameConfig';
+import { GameConfig, Phase, GameMode } from '../domain/GameConfig';
 import { Question, QUESTIONS } from '../domain/Questions';
 import { ScoreSystem } from '../domain/ScoreSystem';
-import { Motivator, TrophyMotivator } from '../ui/motivators';
 import { TimerService } from '../domain/TimerService';
 import { UIRenderer } from '../ui/domRenderer';
 import { PerformanceTracker } from '../domain/PerformanceTracker';
@@ -15,35 +14,42 @@ export class GameController {
   private readonly config: GameConfig;
   private readonly scoreSystem: ScoreSystem;
   private readonly performanceTracker: PerformanceTracker;
-  private readonly motivator: Motivator;
   private readonly timer: TimerService;
   private readonly ui: UIRenderer;
   private readonly now: () => number;
+  private readonly BLUR_TIME_MS = 3000;
 
   private tickIntervalId: number | null = null;
 
   private questions: Question[];
-  private currentIndex = 0;
+  private currentQuestionIndex = 0;
   private currentPhase: Phase = 'LEARN';
   private gameOver = false;
   private questionCompleted = false;
   private lastSampleTimestamp = 0;
-  private timeAboveThresholdMs = 0;
-  //private lastDecayTimestamp = 0;
+  private mode: GameMode = GameMode.TROPHY;
+  private lastDecayTimestamp = 0;
   private nextQuestionTimeoutId: number | null = null;
   private readonly postAnswerDelayMs = 700;
   private currentQuestionTrackedMs = 0;
+
+  private pausedUntil = 0;
+  private blurTimeoutId: number | null = null;
 
   constructor() {
     this.ui = new UIRenderer({
       onAnswerSelected: (optionId) => this.answerCurrent(optionId),
       onSkipLearn: () => this.skipLearnPhase(),
+      onGameModeSelected: (mode: GameMode) => {
+        this.mode = mode;
+        this.ui.showGameShell(mode);
+        this.start();
+      }
     });
     this.config = GAME_CONFIG;
     this.now = (() => Date.now());
     this.questions = QUESTIONS;
     this.scoreSystem = new ScoreSystem(this.config);
-    this.motivator = new TrophyMotivator();
     this.timer = new TimerService(this.config.secondsPerQuestion, this.now);
     this.performanceTracker = new PerformanceTracker(this.config);
 
@@ -54,14 +60,14 @@ export class GameController {
 
   start(): void {
     this.clearPendingNextQuestion();
-    this.currentIndex = 0;
+    this.currentQuestionIndex = 0;
     this.currentPhase = 'LEARN';
     this.gameOver = false;
     this.questionCompleted = false;
     this.currentQuestionTrackedMs = 0;
     this.resetTimeTracking();
-    //this.lastDecayTimestamp = this.now();
-    this.timer.startQuestion();
+    this.lastDecayTimestamp = this.now();
+    this.timer.startQuestionTimer();
     this.pushQuestionToUI();
     this.startTickLoop();
   }
@@ -78,6 +84,7 @@ export class GameController {
     this.tickIntervalId = window.setInterval(() => {
       this.tickTimerUI();
       if (this.isGameOver()) {
+        this.endGame();
         this.stop();
       }
     }, 50);
@@ -87,9 +94,10 @@ export class GameController {
     if (this.gameOver || this.questionCompleted) {
       return;
     }
+    if(!this.gameOver)this.blur();
     this.trackTimeSample();
 
-    const question = this.questions[this.currentIndex];
+    const question = this.questions[this.currentQuestionIndex];
     if (!question) {
       return;
     }
@@ -97,21 +105,39 @@ export class GameController {
     const answeredInTime = this.timer.hasTimeLeft();
     const isCorrect = answeredInTime && question.correctOptionId === optionId;
 
+    if(!isCorrect) this.performanceTracker.removeTimeAbove(10000);
+
     this.scoreSystem.applyAnswer(isCorrect, this.currentPhase);
     this.ui.updateScore(this.scoreSystem.getScorePercent());
-    this.ui.updateMotivator(this.scoreSystem.getScorePercent());
-    this.motivator.render(this.scoreSystem.getScorePercent());
+    this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
     this.questionCompleted = true;
     this.ui.showCorrectAnswerIndex(question.correctOptionId);
     this.finalizeQuestionTime();
 
     if (this.scoreSystem.isImmediateLoss()) {
-      this.endGame(false);
+      this.endGame();
       return;
     }
+    
+    
 
     this.scheduleNextQuestion();
+  }
+
+  blur(): void{
+    if (this.blurTimeoutId !== null) {
+      clearTimeout(this.blurTimeoutId);
+    }
+    this.ui.setBlur();
+    this.pausedUntil = this.now() + this.BLUR_TIME_MS;
+    this.blurTimeoutId = window.setTimeout(() => {
+      this.ui.setBlur();
+      this.pausedUntil = 0;
+      this.blurTimeoutId = null;
+      this.timer.reStartQuesionTimer();
+      this.pushQuestionToUI();
+    }, this.BLUR_TIME_MS);
   }
 
   nextQuestion(): void {
@@ -121,37 +147,27 @@ export class GameController {
     this.clearPendingNextQuestion();
     this.trackTimeSample();
 
-    this.currentIndex += 1;
-    if (this.currentIndex >= this.questions.length) {
+    this.currentQuestionIndex += 1;
+    if (this.currentQuestionIndex >= this.questions.length) {
       if (this.currentPhase === 'LEARN') {
         this.currentPhase = 'TEST';
-        this.currentIndex = 0;
+        this.currentQuestionIndex = 0;
       } else {
-        const won =
-          this.getTimeAboveThresholdFraction() >= this.config.requiredScoreAboveThresholdFraction;
-        this.endGame(won);
+        this.endGame();
         return;
       }
     }
 
     this.questionCompleted = false;
     this.currentQuestionTrackedMs = 0;
-    this.timer.startQuestion();
-    //this.lastDecayTimestamp = this.now();
+    this.timer.startQuestionTimer();
+    this.lastDecayTimestamp = this.now();
     this.lastSampleTimestamp = this.now();
     this.pushQuestionToUI();
   }
 
   isGameOver(): boolean {
     return this.gameOver;
-  }
-
-  getTimeAboveThresholdFraction(): number {
-    const fullTestDurationMs = this.toMilliSeconds(this.questions.length * this.config.secondsPerQuestion);
-    if (fullTestDurationMs === 0) {
-      return 0;
-    }
-    return Math.min(1, this.timeAboveThresholdMs / fullTestDurationMs);
   }
 
   toSeconds(milliseconds: number): number {
@@ -168,32 +184,32 @@ export class GameController {
     }
     this.clearPendingNextQuestion();
     this.currentPhase = 'TEST';
-    this.currentIndex = 0;
+    this.currentQuestionIndex = 0;
     this.questionCompleted = false;
     this.currentQuestionTrackedMs = 0;
     this.lastSampleTimestamp = this.now();
-    this.timer.startQuestion();
-    //this.lastDecayTimestamp = this.now();
+    this.timer.startQuestionTimer();
+    this.lastDecayTimestamp = this.now();
     this.pushQuestionToUI();
   }
 
   tickTimerUI(): void {
     this.trackTimeSample();
+    if(this.now() < this.pausedUntil){this.lastDecayTimestamp = this.now(); return;}
     this.pushTimeAboveToUI();
 
     const now = this.now();
-    //const decayDeltaSeconds = this.toSeconds(now - this.lastDecayTimestamp);
-    //this.lastDecayTimestamp = now;
+    const decayDeltaSeconds = this.toSeconds(now - this.lastDecayTimestamp);
+    this.lastDecayTimestamp = now;
 
     // kontinuierlicher Punkteabzug nur in der Prüfphase
     if (!this.gameOver && !this.questionCompleted && this.currentPhase === 'TEST') {
-      //this.scoreSystem.applyTimeDecay(decayDeltaSeconds, this.currentPhase);
+      this.scoreSystem.applyTimeDecay(decayDeltaSeconds, this.currentPhase);
       this.ui.updateScore(this.scoreSystem.getScorePercent());
-      this.ui.updateMotivator(this.scoreSystem.getScorePercent());
-      this.motivator.render(this.scoreSystem.getScorePercent());
+      this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
       if (this.scoreSystem.isImmediateLoss()) {
-        this.endGame(false);
+        this.endGame();
         return;
       }
     }
@@ -203,12 +219,14 @@ export class GameController {
 
     if (remainingTime === 0 && !this.gameOver && !this.questionCompleted) {
       // Timeout ohne Antwort: wie falsche Antwort werten
-      const question = this.questions[this.currentIndex];
+      if(!this.gameOver)this.blur();
+      const question = this.questions[this.currentQuestionIndex];
       this.scoreSystem.applyAnswer(false, this.currentPhase);
       this.ui.updateScore(this.scoreSystem.getScorePercent());
-      this.ui.updateMotivator(this.scoreSystem.getScorePercent());
-      this.motivator.render(this.scoreSystem.getScorePercent());
+      this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
 
+      this.performanceTracker.removeTimeAbove(10000);
+      
       this.questionCompleted = true;
       if (question) {
         this.ui.showCorrectAnswerIndex(question.correctOptionId);
@@ -216,7 +234,7 @@ export class GameController {
       this.finalizeQuestionTime();
 
       if (this.scoreSystem.isImmediateLoss()) {
-        this.endGame(false);
+        this.endGame();
         return;
       }
 
@@ -225,27 +243,30 @@ export class GameController {
   }
 
   private pushQuestionToUI(): void {
-    const question = this.questions[this.currentIndex];
+    if(this.now() < this.pausedUntil ) return;
+    const question = this.questions[this.currentQuestionIndex];
     this.ui.showQuestion(question);
-    this.ui.updateQuestionIndex(this.currentIndex + 1, this.questions.length);
+    this.ui.updateQuestionIndex(this.currentQuestionIndex + 1, this.questions.length);
     this.ui.updatePhase(this.currentPhase);
     this.ui.updateTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
     this.ui.updateScore(this.scoreSystem.getScorePercent());
-    this.ui.updateMotivator(this.scoreSystem.getScorePercent());
+    this.ui.updateMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
     this.pushTimeAboveToUI();
   }
 
-  private endGame(won: boolean): void {
+  private endGame(): void {
+    this.gameOver = true;
+    let won = false;
+    if(this.performanceTracker.getTimeAboveThresholdFraction()*100 >= this.config.winScoreThresholdPercent) won = true;
     this.trackTimeSample();
     this.finalizeQuestionTime();
     this.clearPendingNextQuestion();
-    this.gameOver = true;
-    this.ui.showGameOver(won);
-    this.motivator.renderGameOver(won);
+    this.ui.showGameOver(won, this.mode);
   }
 
   private trackTimeSample(): void {
     const now = this.now();
+    if(now < this.pausedUntil){ this.lastSampleTimestamp = now; return;}
     if (!this.lastSampleTimestamp) {
       this.lastSampleTimestamp = now;
       return;
@@ -267,13 +288,14 @@ export class GameController {
   }
 
   private resetTimeTracking(): void {
-    this.timeAboveThresholdMs = 0;
+    this.performanceTracker.reset();
     this.lastSampleTimestamp = this.now();
   }
 
   private pushTimeAboveToUI(): void {
-    const secondsAbove = this.toSeconds(this.timeAboveThresholdMs);
-    const fraction = this.getTimeAboveThresholdFraction();
+    //let secondsAbove = this.toSeconds(this.timeAboveThresholdMs);
+    let secondsAbove = this.toSeconds(this.performanceTracker.getPerformanceScoreSeconds());
+    const fraction = this.performanceTracker.getTimeAboveThresholdFraction();
     this.ui.updateTimeAbove(secondsAbove, fraction);
   }
 
@@ -302,7 +324,7 @@ export class GameController {
       return;
     }
     if (this.scoreSystem.getScorePercent() >= this.config.winScoreThresholdPercent) {
-      this.timeAboveThresholdMs += remainingMs;
+      this.performanceTracker.addTimeAbove(remainingMs);
     }
     this.currentQuestionTrackedMs += remainingMs;
   }

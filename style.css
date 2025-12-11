@@ -15,17 +15,25 @@ body {
     font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+.menu-shell {
+
+}
+
 .game-shell {
     padding: 16px;
     width: 100%;
     max-width: 1500px;
     display: flex;
     gap: 16px;
-    align-items: stretch;
+    align-items: stretch; 
+}
+
+.hidden {
+    display: none !important;
 }
 
 .left-panel {
-    flex: 1;
+    width: 60%;
     border: 1px solid rgba(148, 163, 184, 0.5);
     border-radius: 16px;
     box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
@@ -35,40 +43,50 @@ body {
 }
 
 .right-panel {
-    flex: 0 0 auto;
+    width: 40%;
     border: none;
     border-radius: 0;
     box-shadow: none;
     padding: 0;
-    min-height: 0;
-    background: transparent;
+    min-height: 90vh;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
-.mood-wrapper {
+.terminator-image{
+    height: 95%;
+}
+
+.trophy-image{
+    width: 100%;
+}
+
+.motivator-wrapper {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: 100%;
     gap: 12px;
     text-align: center;
     padding: 0;
+    margin-left: 20px;
+    align-items: stretch;
+    height: 100%;
+    flex: 1;
 }
 
-.mood-wrapper h2 {
+.motivator-wrapper h2 {
     margin: 0;
     font-size: 1.2rem;
     color: #0f172a;
 }
 
 .mood-image {
-    width: 560px;
     height: 680px;
     border-radius: 0;
     box-shadow: none;
     border: none;
     object-fit: contain;
     background: transparent;
+    border-radius: 10px;
 }
 
 .game-header {
@@ -150,13 +168,13 @@ body {
     color: #111827;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
 .skip-button:hover:not(:disabled) {
     background: #e2e8f0;
     border-color: rgba(148, 163, 184, 0.9);
-    transform: translateY(-1px);
+    transform: scale(1.05);
 }
 
 .skip-button:active:not(:disabled) {
@@ -198,16 +216,17 @@ body {
     cursor: pointer;
     font-size: 0.98rem;
     text-align: left;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
 .answer-button:hover:not(:disabled) {
-    border-color: rgba(148, 163, 184, 0.5);
-
-    transform: scale(1.01);
+    border-color: #004cff;
+    background-color: #ceddff;
+    transform: scale(1.03);
 }
 
 .answer-button:active:not(:disabled) {
+    
     transform: translateY(0);
 }
 
@@ -221,6 +240,7 @@ body {
     box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
     background: linear-gradient(90deg, #dcfce7, #f0fdf4);
     opacity: 1;
+    filter: blur(0) !important;
 }
 
 .score-section {
@@ -280,3 +300,73 @@ body {
     font-weight: 600;
     font-size: 1rem;
 }
+
+.performance-bar{
+    width: 14px;
+    min-width:14px;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(180deg,  #ecfdf3 0%, #fee2e2 100%);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    flex-shrink: 0;
+}
+
+.performance-fill{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(180deg, #22c55e, #ef4444);
+    transition: width 0.25s ease;
+}
+
+.options{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.game-mode-selector{
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: white;
+    height: 30px;
+    transition: transform 0.1s ease;
+}
+.game-mode-selector:hover{
+    background-color: #ceddff;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+
+
+
+/* TERMINATOR */
+
+.terminator-wrapper{
+    width: 100%;
+}
+
+.pipe{
+    width: 20%;
+    height: 70px;
+    background-color: gray;
+}
+
+.press{
+    width: 80%;
+    height: 50px;
+    background-color: gray;
+}
+
+.hydraulic-press{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
