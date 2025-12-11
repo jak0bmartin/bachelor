@@ -1,4 +1,4 @@
-import { Question } from '../data/Questions';
+import { Question } from '../data/Question';
 import { GameMode } from '../data/GameConfig';
 import { MotivatorTheme, MOTIVATOR_THEMES } from './MotivatorTheme';
 import { GAME_CONFIG } from '../data/GameConfig';

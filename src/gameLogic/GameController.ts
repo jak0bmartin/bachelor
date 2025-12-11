@@ -1,21 +1,19 @@
 import { GAME_CONFIG } from '../data/GameConfig';
 import { GameConfig, Phase, GameMode } from '../data/GameConfig';
-import { Question, QUESTIONS } from '../data/Questions';
+import { Question, QUESTIONS } from '../data/Question';
 import { ScoreSystem } from './ScoreSystem';
 import { TimerService } from './TimerService';
 import { DomView } from '../ui/DomView';
 import { PerformanceTracker } from './PerformanceTracker';
+import { QuestionHandler } from './QuestionHandler';
 
-
-/**
- * Coordinates question flow, scoring, timer updates, and UI callbacks.
- */
 export class GameController {
   private readonly config: GameConfig;
   private readonly scoreSystem: ScoreSystem;
   private readonly performanceTracker: PerformanceTracker;
   private readonly timer: TimerService;
   private readonly ui: DomView;
+  private readonly questionHandler: QuestionHandler;
   private readonly now: () => number;
   private readonly BLUR_TIME_MS = 3000;
 
@@ -33,11 +31,15 @@ export class GameController {
 
   private pausedUntil = 0;
   private blurTimeoutId: number | null = null;
+  private readonly DELAY_TIME = 2000;
+  private readonly FIRSTQU_DELAY_TIME = 0;
+  private questionAnswered = false;
 
   constructor() {
+    this.questionHandler = new QuestionHandler(QUESTIONS);
     this.ui = new DomView();
-    this.ui.setAnswerHandler((optionId) => this.answerCurrent(optionId));
-    this.ui.onSkipLearn = () => this.skipLearnPhase();
+    this.ui.setAnswerHandler((optionId) => this.processAnswer(optionId));
+    //this.ui.onSkipLearn = () => this.skipLearnPhase();
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
       this.ui.renderGameShell(mode);
@@ -61,11 +63,13 @@ export class GameController {
     this.gameOver = false;
     this.questionCompleted = false;
     this.currentQuestionTrackedMs = 0;
-    this.resetTimeTracking();
+    //this.resetTimeTracking();
     this.lastDecayTimestamp = this.now();
     this.timer.startQuestionTimer();
-    this.pushQuestionToUI();
-    this.startTickLoop();
+    this.getQuestion(this.FIRSTQU_DELAY_TIME);
+    this.startGameLoop();
+    //this.pushQuestionToUI();
+    //this.startLoop();
   }
 
   stop(): void {
@@ -75,18 +79,49 @@ export class GameController {
     }
   }
 
-  private startTickLoop(): void {
+  /*private startGameLoop(): void {
     this.stop();
     this.tickIntervalId = window.setInterval(() => {
-      this.tickTimerUI();
+
+      this.getQuestion();
       if (this.isGameOver()) {
         this.endGame();
         this.stop();
       }
     }, 50);
+  }*/
+
+
+  private startGameLoop(): void {
+    this.stop();
+    this.tickIntervalId = window.setInterval(() => {
+      this.ui.renderTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
+      if (!this.timer.hasTimeLeft()) {
+        this.processAnswer(-1);
+      }
+    }, 50);
   }
 
-  answerCurrent(optionId: number): void {
+  getQuestion(delay: number) {
+    setTimeout(() => {
+      const question = this.questionHandler.getNextQuestion();
+      this.ui.renderQuestion(question);
+      this.timer.startQuestionTimer();
+      this.questionAnswered = false;
+      this.startGameLoop();
+    }, delay);
+  }
+
+  processAnswer(optionId: number) {
+    this.stop();
+    this.questionAnswered = true;
+    this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
+    this.scoreSystem.applyAnswer(this.questionHandler.getCorrectAnswer() == optionId, 'TEST');
+    this.ui.renderScore(this.scoreSystem.getScorePercent());
+    this.getQuestion(this.DELAY_TIME);
+  }
+
+  /*answerCurrent(optionId: number): void {
     if (this.gameOver || this.questionCompleted) {
       return;
     }
@@ -303,5 +338,5 @@ export class GameController {
       this.performanceTracker.addTimeAbove(remainingMs);
     }
     this.currentQuestionTrackedMs += remainingMs;
-  }
+  }*/
 }

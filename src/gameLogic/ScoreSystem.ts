@@ -15,16 +15,11 @@ export class ScoreSystem {
     this.currentScore = config.initialScorePercent;
   }
 
-  /**
-   * Applies the scoring delta for the given answer and phase.
-   */
+
   applyAnswer(isCorrect: boolean, phase: Phase): void {
     this.currentScore = applyAnswerScore(this.currentScore, phase, isCorrect, this.config);
   }
 
-  /**
-   * Kontinuierlicher Score-Abbau in der Prüfphase, z.B. -1 % pro Sekunde.
-   */
   applyTimeDecay(deltaSeconds: number, phase: Phase): void {
     if (phase !== 'TEST') {
       return;

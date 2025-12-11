@@ -1,6 +1,3 @@
-/**
- * Lightweight timer helper. Uses Date.now by default but can be injected for tests.
- */
 export class TimerService {
   private questionStartedAt = 0;
 
@@ -25,7 +22,6 @@ export class TimerService {
     if (!this.questionStartedAt) {
       return this.secondsPerQuestion;
     }
-
     const elapsedMs = this.now() - this.questionStartedAt;
     const remaining = this.secondsPerQuestion - Math.floor(elapsedMs / 1000);
     return Math.max(0, remaining);
