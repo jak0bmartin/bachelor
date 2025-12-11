@@ -1,4 +1,4 @@
-import { GameController } from './game/GameController';
+import { GameController } from './gameLogic/GameController';
 
 function setup() {
     const controller = new GameController();

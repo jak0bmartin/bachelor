@@ -29,8 +29,6 @@ export class GameController {
   private lastSampleTimestamp = 0;
   private mode: GameMode = GameMode.TROPHY;
   private lastDecayTimestamp = 0;
-  private nextQuestionTimeoutId: number | null = null;
-  private readonly postAnswerDelayMs = 700;
   private currentQuestionTrackedMs = 0;
 
   private pausedUntil = 0;
@@ -58,7 +56,6 @@ export class GameController {
   }
 
   start(): void {
-    this.clearPendingNextQuestion();
     this.currentQuestionIndex = 0;
     this.currentPhase = 'LEARN';
     this.gameOver = false;
@@ -119,9 +116,7 @@ export class GameController {
       return;
     }
     
-    
-
-    this.scheduleNextQuestion();
+    this.nextQuestion();
   }
 
   blur(): void{
@@ -143,7 +138,6 @@ export class GameController {
     if (this.gameOver) {
       return;
     }
-    this.clearPendingNextQuestion();
     this.trackTimeSample();
 
     this.currentQuestionIndex += 1;
@@ -181,7 +175,6 @@ export class GameController {
     if (this.gameOver || this.currentPhase === 'TEST') {
       return;
     }
-    this.clearPendingNextQuestion();
     this.currentPhase = 'TEST';
     this.currentQuestionIndex = 0;
     this.questionCompleted = false;
@@ -237,7 +230,7 @@ export class GameController {
         return;
       }
 
-      this.scheduleNextQuestion();
+      this.nextQuestion();
     }
   }
 
@@ -259,7 +252,6 @@ export class GameController {
     if(this.performanceTracker.getTimeAboveThresholdFraction()*100 >= this.config.winScoreThresholdPercent) won = true;
     this.trackTimeSample();
     this.finalizeQuestionTime();
-    this.clearPendingNextQuestion();
     this.ui.renderGameOver(won, this.mode);
   }
 
@@ -296,21 +288,6 @@ export class GameController {
     let secondsAbove = this.toSeconds(this.performanceTracker.getPerformanceScoreSeconds());
     const fraction = this.performanceTracker.getTimeAboveThresholdFraction();
     this.ui.renderTimeAbove(secondsAbove, fraction);
-  }
-
-  private scheduleNextQuestion(): void {
-    this.clearPendingNextQuestion();
-    this.nextQuestionTimeoutId = window.setTimeout(() => {
-      this.nextQuestionTimeoutId = null;
-      this.nextQuestion();
-    }, this.postAnswerDelayMs);
-  }
-
-  private clearPendingNextQuestion(): void {
-    if (this.nextQuestionTimeoutId !== null) {
-      clearTimeout(this.nextQuestionTimeoutId);
-      this.nextQuestionTimeoutId = null;
-    }
   }
 
   private finalizeQuestionTime(): void {
