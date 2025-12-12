@@ -39,7 +39,7 @@ export class GameController {
     this.questionHandler = new QuestionHandler(QUESTIONS);
     this.ui = new DomView();
     this.ui.setAnswerHandler((optionId) => this.processAnswer(optionId));
-    //this.ui.onSkipLearn = () => this.skipLearnPhase();
+    this.ui.onSkipLearn = () => this.skipLearningPhase();
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
       this.ui.renderGameShell(mode);
@@ -49,7 +49,7 @@ export class GameController {
     this.now = (() => Date.now());
     this.questions = QUESTIONS;
     this.scoreSystem = new ScoreSystem(this.config);
-    this.timer = new TimerService(this.config.secondsPerQuestion, this.now);
+    this.timer = new TimerService(this.config.MsPerQuestion, this.now);
     this.performanceTracker = new PerformanceTracker(this.config);
 
     if (!this.questions.length) {
@@ -57,7 +57,7 @@ export class GameController {
     }
   }
 
-  start(): void {
+  private start(): void {
     this.currentQuestionIndex = 0;
     this.currentPhase = 'LEARN';
     this.gameOver = false;
@@ -72,7 +72,7 @@ export class GameController {
     //this.startLoop();
   }
 
-  stopGameloop(): void {
+  private stopGameloop(): void {
     if (this.tickIntervalId !== null) {
       clearInterval(this.tickIntervalId);
       this.tickIntervalId = null;
@@ -91,22 +91,62 @@ export class GameController {
     }, 50);
   }*/
 
+  private skipLearningPhase(): void{
+    this.stopGameloop();
+    this.currentPhase = 'TEST';
+    this.getQuestion(this.DELAY_TIME);
+    this.questionHandler.setQuestionsToTestPhase();
+  }
+
 
   private startGameLoop(): void {
+
     this.stopGameloop();
+    this.performanceTracker.reset();
+    this.scoreSystem.reset();
+
     this.tickIntervalId = window.setInterval(() => {
-      this.ui.renderTimer(this.timer.getRemainingSeconds(), this.timer.getRemainingFraction());
+      this.checkIfGameOver();
+      this.scoreSystem.applyTimeDecay(this.currentPhase);
       this.performanceTracker.changePerformanceScore(this.scoreSystem.getScorePercent());
-      this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
+
+      this.uiForEveryTick();
+
       if (!this.timer.hasTimeLeft()) {
         this.processAnswer(-1);
       }
     }, 50);
   }
 
-  getQuestion(delay: number) {
+  private uiForEveryTick(): void{
+      this.ui.renderQuestionIndex(this.questionHandler.getCurrentQuestionIndex()+1, this.questionHandler.getQuestionTotalNumber());
+      this.ui.renderPhase(this.currentPhase);
+      this.ui.renderTimer(this.timer.getRemainingMs()/1000, this.timer.getRemainingFraction());
+      this.ui.renderScore(this.scoreSystem.getScorePercent());
+      this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
+  }
+
+  private checkIfGameOver(): boolean{
+    let isOver = false;
+    if (this.scoreSystem.isImmediateLoss()) {
+      this.stopGameloop();
+      this.endGame();
+      isOver = true;
+    }
+
+    else if(this.questionAnswered && (this.questionHandler.isLastQuestion() && this.currentPhase == 'TEST')){
+      console.log("ich werde durchlaufen");
+      this.stopGameloop();
+      this.endGame();
+      isOver = true;
+    }
+
+    return isOver;
+  }
+
+  private getQuestion(delay: number) {
     setTimeout(() => {
-      const question = this.questionHandler.getNextQuestion();
+      const question = this.questionHandler.getQuestion();
       this.ui.renderQuestion(question);
       this.timer.startQuestionTimer();
       this.questionAnswered = false;
@@ -114,13 +154,30 @@ export class GameController {
     }, delay);
   }
 
-  processAnswer(optionId: number) {
+  private processAnswer(optionId: number) {
+    const isAnswerCorrect = this.questionHandler.getCorrectAnswer() == optionId;
     this.stopGameloop();
+
     this.questionAnswered = true;
     this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
-    this.scoreSystem.applyAnswer(this.questionHandler.getCorrectAnswer() == optionId, 'TEST');
+    this.scoreSystem.applyAnswer(isAnswerCorrect, this.currentPhase);
     this.ui.renderScore(this.scoreSystem.getScorePercent());
+    this.performanceTracker.changePerformanceScore(this.scoreSystem.getScorePercent(), this.timer.getRemainingMs(), isAnswerCorrect);
+    if(this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN'){
+      this.questionHandler.setQuestionsToTestPhase();
+      this.currentPhase = 'TEST';
+    }
+    else this.questionHandler.setNextQuestion();
+    
+    if(this.checkIfGameOver()) return;
     this.getQuestion(this.DELAY_TIME);
+  }
+
+  private endGame(): void {
+    this.gameOver = true;
+    let won = false;
+    if(this.performanceTracker.getTimeAboveThresholdFraction()*100 >= this.config.winScoreThresholdPercent) won = true;
+    this.ui.renderGameOver(won, this.mode);
   }
 
   /*answerCurrent(optionId: number): void {

@@ -2,22 +2,39 @@ import { Question } from "../data/Question";
 
 export class QuestionHandler {
     private readonly questions: Question[];
-    private nextQuestionIndex = 0;
+    private readonly questionTotalNumber: number;
+    private currentQuestionIndex = 0;
 
     constructor(questions: Question[]){
         this.questions = questions;
+        this.questionTotalNumber = questions.length;
     }
     getCorrectAnswer(): number{ 
-        return this.questions[this.nextQuestionIndex-1].correctOptionId;
+        return this.questions[this.currentQuestionIndex].correctOptionId;
     }
 
-    getNextQuestion(): Question{
-        const question = this.questions[this.nextQuestionIndex];
-        this.nextQuestionIndex++;
+    setQuestionsToTestPhase(): void{
+        this.currentQuestionIndex = 0;
+    }
+
+    setNextQuestion(): void{
+        this.currentQuestionIndex++;
+    }
+
+    getQuestion(): Question{
+        const question = this.questions[this.currentQuestionIndex];
         return question;
     }
 
     getCurrentQuestionIndex(): number{
-        return this.nextQuestionIndex-1;
+        return this.currentQuestionIndex;
+    }
+
+    getQuestionTotalNumber(): number{
+        return this.questionTotalNumber;
+    }
+
+    isLastQuestion(): boolean{
+       return this.getCurrentQuestionIndex() + 1 >= this.getQuestionTotalNumber();
     }
 }

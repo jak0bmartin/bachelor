@@ -2,7 +2,7 @@ export class TimerService {
   private questionStartedAt = 0;
 
   constructor(
-    private readonly secondsPerQuestion: number,
+    private readonly MsPerQuestion: number,
     private readonly now: () => number = () => Date.now(),
   ) {}
 
@@ -15,15 +15,15 @@ export class TimerService {
   }
 
   hasTimeLeft(): boolean {
-    return this.getRemainingSeconds() > 0;
+    return this.getRemainingMs() > 0;
   }
 
-  getRemainingSeconds(): number {
+  getRemainingMs(): number {
     if (!this.questionStartedAt) {
-      return this.secondsPerQuestion;
+      return this.MsPerQuestion;
     }
     const elapsedMs = this.now() - this.questionStartedAt;
-    const remaining = this.secondsPerQuestion - Math.floor(elapsedMs / 1000);
+    const remaining = this.MsPerQuestion - Math.floor(elapsedMs);
     return Math.max(0, remaining);
   }
 
@@ -32,8 +32,8 @@ export class TimerService {
       return 1;
     }
     const elapsedMs = this.now() - this.questionStartedAt;
-    const remainingMs = this.secondsPerQuestion * 1000 - elapsedMs;
-    const percentValue = remainingMs / (this.secondsPerQuestion * 1000);
+    const remainingMs = this.MsPerQuestion - elapsedMs;
+    const percentValue = remainingMs / (this.MsPerQuestion);
     return Math.max(0, Math.min(1, percentValue));
   }
 }

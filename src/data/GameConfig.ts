@@ -20,7 +20,7 @@ export enum GameMode {
 // Zentrale Spielkonfiguration, direkt aus dem Scoring-Konzept abgeleitet
 export interface GameConfig {
   // Ablauf
-  secondsPerQuestion: number;
+  MsPerQuestion: number;
   totalQuestions: number;
 
 
@@ -48,7 +48,7 @@ export interface GameConfig {
 
 // Konkrete Standardkonfiguration deines Spiels
 export const GAME_CONFIG: GameConfig = {
-  secondsPerQuestion: 10,
+  MsPerQuestion: 10000,
   totalQuestions: 10,
 
   maxScorePercent: 100,
@@ -69,8 +69,8 @@ export const GAME_CONFIG: GameConfig = {
   minPerformanceScore: 0,
 };
 
-export const getTotalTestDurationMs = (config: Pick<GameConfig, 'secondsPerQuestion'|'totalQuestions'>) =>
-  config.secondsPerQuestion * config.totalQuestions * 1000;
+export const getTotalTestDurationMs = (config: Pick<GameConfig, 'MsPerQuestion'|'totalQuestions'>) =>
+  config.MsPerQuestion * config.totalQuestions;
 
 
 // Hilfsfunktion: wendet die Score-Regel aus dem Konfigurationsdokument an

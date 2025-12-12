@@ -6,6 +6,7 @@ export class PerformanceTracker {
     readonly minPerformanceScore: number;
     readonly gameDurationMs: number;
     readonly winThresholdPercent: number;
+    readonly timePerQuestion: number;
 
     private lastCallTime = 0;
     private readonly now: () => number = () => Date.now();
@@ -19,14 +20,23 @@ export class PerformanceTracker {
         this.gameDurationMs = getTotalTestDurationMs(config);
         this.winThresholdPercent = config.winScoreThresholdPercent;
         this.lastCallTime = this.now();
+        this.timePerQuestion = config.MsPerQuestion;
     }
 
-    public changePerformanceScore(currentScore: number){
+    public changePerformanceScore(currentScore: number, deltaTime?: number, answerCorrect?: boolean) {
         let extraSecondsAboveThreshold = 0;
-        if(this.lastCallTime != 0) extraSecondsAboveThreshold = this.now() - this.lastCallTime;
+        if (deltaTime === undefined) {
+            if (this.lastCallTime != 0) extraSecondsAboveThreshold = this.now() - this.lastCallTime;
+        }
+        else{
+            extraSecondsAboveThreshold = deltaTime;
+        }
         this.lastCallTime = this.now();
-        //console.log("extraSecondsAboveThreshold:",extraSecondsAboveThreshold);
-        if(currentScore >= this.winThresholdPercent) this.addTimeAbove(extraSecondsAboveThreshold);
+        if(answerCorrect !== undefined){
+            if(!answerCorrect){this.removeTimeAbove(this.timePerQuestion); return;}
+        }
+        if (currentScore >= this.winThresholdPercent) this.addTimeAbove(extraSecondsAboveThreshold);
+        else if (currentScore < this.winThresholdPercent) this.removeTimeAbove(extraSecondsAboveThreshold);
     }
 
     /*public changePerformanceScore(timeClamped: number, currentScorePercent: number, currentQuestionTrackedMs: number): void {
@@ -42,7 +52,7 @@ export class PerformanceTracker {
 
     }*/
 
-    public getPerformanceScore(): number{
+    public getPerformanceScore(): number {
         return this.getTimeAboveThresholdFraction() * 100;
     }
 
@@ -60,11 +70,11 @@ export class PerformanceTracker {
     }
 
     public addTimeAbove(time: number): void {
-       if( (this.getTimeAboveThresholdFraction() *100) < 60)
-        this.currentPerformanceScoreMs += time;
+        //if ((this.getTimeAboveThresholdFraction() * 100) < 60) nur nötig bei max 60%
+            this.currentPerformanceScoreMs += time;
         this.checkIfInvalidScore();
 
-        console.log("this.currentPerformanceScoreMs: ",this.currentPerformanceScoreMs);
+        console.log("this.currentPerformanceScoreMs: ", this.currentPerformanceScoreMs);
         console.log("time", time);
     }
 
@@ -74,16 +84,15 @@ export class PerformanceTracker {
     }
 
     public reset(): void {
-        this.currentPerformanceScoreMs = 0;
         this.lastCallTime = this.now();
     }
 
     private checkIfInvalidScore(): void {
         if (this.currentPerformanceScoreMs < 0)
             this.currentPerformanceScoreMs = 0;
-        else if(this.currentPerformanceScoreMs > getTotalTestDurationMs(this.config))
+        else if (this.currentPerformanceScoreMs > getTotalTestDurationMs(this.config))
             this.currentPerformanceScoreMs = getTotalTestDurationMs(this.config);
-        else if((this.getTimeAboveThresholdFraction() *100) > 60)
-            this.currentPerformanceScoreMs = getTotalTestDurationMs(this.config) *0.6;
+        /*else if ((this.getTimeAboveThresholdFraction() * 100) > 60)
+            this.currentPerformanceScoreMs = getTotalTestDurationMs(this.config) * 0.6;*/
     }
 }
