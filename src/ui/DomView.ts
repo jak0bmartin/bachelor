@@ -34,8 +34,12 @@ export class DomView {
   private terminatorWrapperEl: HTMLElement;
   private trophyImageEl: HTMLImageElement;
 
+  private leftPipeEl: HTMLImageElement;
+  private rightPipeEl: HTMLImageElement;
+  private pressPlateEl: HTMLImageElement;
 
-  private terminatorPipeEl: HTMLElement;
+
+  //private terminatorPipeEl: HTMLElement;
 
 
   private performanceFillEl: HTMLElement;
@@ -45,6 +49,7 @@ export class DomView {
   private gameShellEl: HTMLElement;
   private menuShellEl: HTMLElement;
   private scoreSectionEl: HTMLElement;
+  private gameHeaderEl: HTMLElement;
 
   private currentAnswerButtons: HTMLButtonElement[] = [];
   private lastTimerSeconds: number | null = null;
@@ -81,12 +86,17 @@ export class DomView {
     const menuShellElement = doc.getElementById('menu-shell');
     const leftPanelElement = doc.getElementById('left-panel');
     const scoreSectionElement = doc.getElementById('score-section');
+    const gameHeaderElement = doc.getElementById('game-header');
 
     const terminatorWrapperElement = doc.getElementById('terminator-wrapper');
     const marieImageElement = doc.getElementById('mood-image') as HTMLImageElement | null;
     const trophyImageElement = doc.getElementById('trophy-image') as HTMLImageElement | null;
 
-    const terminatorPipeElement = doc.getElementById('pipe');
+    const rightPipeElement = doc.getElementById('pipe-right')as HTMLImageElement | null;
+    const leftPipeElement = doc.getElementById('pipe-left')as HTMLImageElement | null;
+    const pressPlateElement = doc.getElementById('press-plate')as HTMLImageElement | null;
+
+    //const terminatorPipeElement = doc.getElementById('pipe');
 
     if (
       !questionElement ||
@@ -109,9 +119,13 @@ export class DomView {
       !gameShellElement ||
       !menuShellElement ||
       !trophyImageElement ||
-      !terminatorPipeElement ||
+      //!terminatorPipeElement ||
       !leftPanelElement ||
-      !scoreSectionElement
+      !scoreSectionElement ||
+      !gameHeaderElement ||
+      !rightPipeElement ||
+      !leftPipeElement ||
+      !pressPlateElement
     ) {
       throw new Error('DomView: Missing one or more required DOM elements.');
     }
@@ -136,7 +150,13 @@ export class DomView {
     this.terminatorWrapperEl = terminatorWrapperElement;
     this.trophyImageEl = trophyImageElement;
 
-    this.terminatorPipeEl = terminatorPipeElement;
+    this.leftPipeEl = leftPipeElement;
+    this.rightPipeEl = rightPipeElement;
+    this.pressPlateEl = pressPlateElement;
+
+    
+
+    //this.terminatorPipeEl = terminatorPipeElement;
 
 
 
@@ -148,6 +168,7 @@ export class DomView {
     this.menuShellEl = menuShellElement;
     this.leftPanelEl = leftPanelElement;
     this.scoreSectionEl = scoreSectionElement;
+    this.gameHeaderEl = gameHeaderElement;
 
 
     this.skipLearnButtonEl.onclick = () => this.onSkipLearn?.();
@@ -204,15 +225,17 @@ export class DomView {
     if (this.isBlured) {
       this.isBlured = false;
       this.scoreSectionEl.style.filter = "blur(0px)";
+      this.gameHeaderEl.style.filter = "blur(0px)";
       this.currentAnswerButtons.forEach((b) => {
         b.style.filter = "blur(0px)";
       });
     }
-    else if(!this.isBlured){
+    else if (!this.isBlured) {
       this.isBlured = true;
-      this.scoreSectionEl.style.filter = "blur(4px)";
+      this.scoreSectionEl.style.filter = "blur(10px)";
+      this.gameHeaderEl.style.filter = "blur(10px)";
       this.currentAnswerButtons.forEach((b) => {
-        b.style.filter = "blur(4px)";
+        b.style.filter = "blur(10px)";
       });
     }
     //else if (!this.isBlured) { this.leftPanelEl.style.filter = "blur(4px)"; this.isBlured = true; }
@@ -250,8 +273,8 @@ export class DomView {
 
   renderGameOver(won: boolean, mode: GameMode): void {
     this.gameOverEl.textContent = won ? 'Gewonnen! 🎉' : 'Verloren 😢';
-    if(won)  this.renderMotivator(100, mode);
-    if(!won)this.renderMotivator(0, mode);
+    if (won) this.renderMotivator(100, mode);
+    if (!won) this.renderMotivator(0, mode);
     this.currentAnswerButtons.forEach((b) => {
       b.disabled = true;
     });
@@ -293,7 +316,7 @@ export class DomView {
         this.performanceFillEl.style.background = `#ef4444`;
         break;
     }
-    //this.updateMoodImage(percentNumber);
+    
   }
 
   private renderMarie(abovePercent: number): void {
@@ -323,7 +346,15 @@ export class DomView {
 
   private renderTerminator(abovePercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TERMINATOR);
-    const newPipeHeight = abovePercent * 10;
+    const maxPipeHeightPx = 250;
+    const startOfPressPlatePx = 240;
+    let newPipeHeight = (abovePercent/100)*maxPipeHeightPx;
+    if(newPipeHeight < 15) newPipeHeight = 15;
+    this.rightPipeEl.style.height =  `${newPipeHeight}px`;
+    this.leftPipeEl.style.height =  `${newPipeHeight}px`;
+    this.pressPlateEl.style.top = `${newPipeHeight+startOfPressPlatePx}px`;
+    
+    /*const newPipeHeight = abovePercent * 10;
     if (abovePercent > 7 && abovePercent < 40) {
       this.terminatorPipeEl.style.height = `${newPipeHeight}px`;
     }
@@ -344,10 +375,12 @@ export class DomView {
       }
       const newPipeHeight = this.performanceRecord;
       this.terminatorPipeEl.style.height = `${newPipeHeight}px`;
-    }
+    }*/
   }
 
   private renderTrophy(abovePercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
+    
   }
+
 }

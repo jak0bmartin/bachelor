@@ -13,11 +13,11 @@ body {
     align-items: center;
     justify-content: center;
     font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    /*background-color: #dcfce7;*/
+    background-color: #191919;
 }
 
-.menu-shell {
-
-}
+.menu-shell {}
 
 .game-shell {
     padding: 16px;
@@ -25,7 +25,7 @@ body {
     max-width: 1500px;
     display: flex;
     gap: 16px;
-    align-items: stretch; 
+    align-items: stretch;
 }
 
 .hidden {
@@ -53,13 +53,24 @@ body {
     align-items: stretch;
 }
 
-.terminator-image{
+.terminator-image {
     height: 95%;
 }
 
 .trophy-image{
     width: 100%;
+    height: 100%;
 }
+
+.trophy-image > svg{
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+.trophy-image>svg path{
+    fill: #f5c400;
+}
+
 
 .motivator-wrapper {
     display: flex;
@@ -155,9 +166,17 @@ body {
 }
 
 @keyframes timerPulse {
-    0% { transform: scale(1); }
-    35% { transform: scale(1.18); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    35% {
+        transform: scale(1.18);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .skip-button {
@@ -226,7 +245,7 @@ body {
 }
 
 .answer-button:active:not(:disabled) {
-    
+
     transform: translateY(0);
 }
 
@@ -301,41 +320,43 @@ body {
     font-size: 1rem;
 }
 
-.performance-bar{
+.performance-bar {
     width: 14px;
-    min-width:14px;
+    min-width: 14px;
     height: 100%;
     position: relative;
-    background: linear-gradient(180deg,  #ecfdf3 0%, #fee2e2 100%);
+    background: linear-gradient(180deg, #ecfdf3 0%, #fee2e2 100%);
     border-radius: 999px;
     overflow: hidden;
     border: 1px solid rgba(148, 163, 184, 0.5);
     flex-shrink: 0;
 }
 
-.performance-fill{
+.performance-fill {
     position: absolute;
     bottom: 0;
     left: 0;
     height: 100%;
     width: 100%;
     background: linear-gradient(180deg, #22c55e, #ef4444);
-    transition: width 0.25s ease;
+    transition: height 0.25s ease;
 }
 
-.options{
+.options {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-.game-mode-selector{
+
+.game-mode-selector {
     border: solid 1px black;
     border-radius: 5px;
     background-color: white;
     height: 30px;
     transition: transform 0.1s ease;
 }
-.game-mode-selector:hover{
+
+.game-mode-selector:hover {
     background-color: #ceddff;
     cursor: pointer;
     transform: scale(1.1);
@@ -346,27 +367,47 @@ body {
 
 /* TERMINATOR */
 
-.terminator-wrapper{
+.terminator-wrapper {
     width: 100%;
 }
 
-.pipe{
-    width: 20%;
-    height: 70px;
-    background-color: gray;
+#pipe-left {
+    position: absolute;
+    width: 15px;
+    top: 245px;
+    left: 205px;
+    height: 200px;
+    transition: height 0.5s ease;
 }
 
-.press{
-    width: 80%;
-    height: 50px;
-    background-color: gray;
+#pipe-right {
+    position: absolute;
+    width: 15px;
+    top: 245px;
+    left: 273px;
+    height: 200px;
+    transition: height 0.5s ease;
 }
 
-.hydraulic-press{
+#press {
+    height: 700px;
+    max-height: 100%;
+}
+
+#press-plate{
+    position: absolute;
+    width: 260px;
+    height: 40px;
+    top: 252px;
+    left: 110px;
+    transition: top 0.5s ease;
+}
+
+.hydraulic-press {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    width: 510.533px;
+    position: relative;
 }
-

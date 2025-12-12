@@ -39,19 +39,6 @@ export class PerformanceTracker {
         else if (currentScore < this.winThresholdPercent) this.removeTimeAbove(extraSecondsAboveThreshold);
     }
 
-    /*public changePerformanceScore(timeClamped: number, currentScorePercent: number, currentQuestionTrackedMs: number): void {
-
-
-        if (currentScorePercent > this.winThresholdPercent) {
-            this.addTimeAbove(timeClamped);
-        }
-
-        else if (currentScorePercent <= this.winThresholdPercent) {
-            this.removeTimeAbove(timeClamped);
-        }
-
-    }*/
-
     public getPerformanceScore(): number {
         return this.getTimeAboveThresholdFraction() * 100;
     }
@@ -61,7 +48,6 @@ export class PerformanceTracker {
         if (fullTestDurationMs === 0) {
             return 0;
         }
-        console.log("ergebnis", Math.min(1, this.currentPerformanceScoreMs / fullTestDurationMs));
         return Math.min(1, this.currentPerformanceScoreMs / fullTestDurationMs);
     }
 
