@@ -37,4 +37,8 @@ export class QuestionHandler {
     isLastQuestion(): boolean{
        return this.getCurrentQuestionIndex() + 1 >= this.getQuestionTotalNumber();
     }
+
+    resetQuestions(): void{
+        this.currentQuestionIndex = 0;
+    }
 }

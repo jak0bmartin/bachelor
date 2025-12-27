@@ -7,27 +7,22 @@ import { GAME_CONFIG } from '../data/GameConfig';
 type UIEvents = {
   onAnswerSelected?: (optionId: number) => void;
   onSkipLearn?: () => void;
+  onReplay?: () => void;
   onGameModeSelected?: (mode: GameMode) => void;
 };
 
-/**
- * Handles all DOM updates and user interaction bindings.
- * Acts as the View layer: receives state updates and applies them to the UI.
- */
 export class DomView {
   private motivatorThemes: Record<GameMode, MotivatorTheme>;
 
   private questionEl: HTMLElement;
   private answersEl: HTMLElement;
-  private timerEl: HTMLSpanElement;
-  private timerClockEl: HTMLElement;
+  private timeBarFillEl: HTMLElement;
+  private timeBarEl: HTMLElement;
   private phaseLabelEl: HTMLElement;
   private questionIndexEl: HTMLElement;
-  private scoreFillEl: HTMLElement;
-  private motivatorEl: HTMLElement;
   private gameOverEl: HTMLElement;
-  private timeAboveEl: HTMLElement;
   private skipLearnButtonEl: HTMLButtonElement;
+  private replayButtonEl: HTMLButtonElement;
   private leftPanelEl: HTMLElement;
 
   private marieImageEl: HTMLImageElement;
@@ -38,11 +33,6 @@ export class DomView {
   private rightPipeEl: HTMLImageElement;
   private pressPlateEl: HTMLImageElement;
 
-
-  //private terminatorPipeEl: HTMLElement;
-
-
-  private performanceFillEl: HTMLElement;
   private gameModeSimpleButtonEl: HTMLButtonElement;
   private gameModeTerminatorButtonEl: HTMLButtonElement;
   private gameModeMarieButtonEl: HTMLButtonElement;
@@ -56,8 +46,6 @@ export class DomView {
   private currentMood: string | null = null;
 
   private gameStart = true;
-
-
   private performanceRecord = 400;
   private goUp = true;
   private isBlured = false;
@@ -65,117 +53,54 @@ export class DomView {
   onAnswerSelected?: (optionId: number) => void;
   onSkipLearn?: () => void;
   onGameModeSelected?: (mode: GameMode) => void;
+  onReplay?: () => void;
 
   constructor(doc: Document = document) {
-    const questionElement = doc.getElementById('question-text');
-    const answersElement = doc.getElementById('answers');
-    const timerElement = doc.getElementById('timer') as HTMLSpanElement | null;
-    const timerClockElement = doc.querySelector('.timer-clock') as HTMLElement | null;
-    const phaseLabelElement = doc.getElementById('phase-label');
-    const questionIndexElement = doc.getElementById('question-index-label');
-    const scoreFillElement = doc.getElementById('score-fill');
-    const performanceFillElement = doc.getElementById('performance-fill');
-    const motivatorElement = doc.getElementById('motivator-text');
-    const gameOverElement = doc.getElementById('game-over');
-    const timeAboveElement = doc.getElementById('time-above-info');
-    const skipLearnButton = doc.getElementById('skip-learn-button') as HTMLButtonElement | null;
-    const gameModeSimpleButtonElement = doc.getElementById('game-mode-simple') as HTMLButtonElement | null;;
-    const gameModeTerminatorButtonElement = doc.getElementById('game-mode-terminator') as HTMLButtonElement | null;;
-    const gameModeMarieButtonElement = doc.getElementById('game-mode-marie') as HTMLButtonElement | null;
-    const gameShellElement = doc.getElementById('game-shell');
-    const menuShellElement = doc.getElementById('menu-shell');
-    const leftPanelElement = doc.getElementById('left-panel');
-    const scoreSectionElement = doc.getElementById('score-section');
-    const gameHeaderElement = doc.getElementById('game-header');
-
-    const terminatorWrapperElement = doc.getElementById('terminator-wrapper');
-    const marieImageElement = doc.getElementById('mood-image') as HTMLImageElement | null;
-    const trophyImageElement = doc.getElementById('trophy-image') as HTMLImageElement | null;
-
-    const rightPipeElement = doc.getElementById('pipe-right')as HTMLImageElement | null;
-    const leftPipeElement = doc.getElementById('pipe-left')as HTMLImageElement | null;
-    const pressPlateElement = doc.getElementById('press-plate')as HTMLImageElement | null;
-
-    //const terminatorPipeElement = doc.getElementById('pipe');
-
-    if (
-      !questionElement ||
-      !answersElement ||
-      !timerElement ||
-      !timerClockElement ||
-      !scoreFillElement ||
-      !motivatorElement ||
-      !gameOverElement ||
-      !phaseLabelElement ||
-      !questionIndexElement ||
-      !timeAboveElement ||
-      !skipLearnButton ||
-      !marieImageElement ||
-      !terminatorWrapperElement ||
-      !performanceFillElement ||
-      !gameModeSimpleButtonElement ||
-      !gameModeTerminatorButtonElement ||
-      !gameModeMarieButtonElement ||
-      !gameShellElement ||
-      !menuShellElement ||
-      !trophyImageElement ||
-      //!terminatorPipeElement ||
-      !leftPanelElement ||
-      !scoreSectionElement ||
-      !gameHeaderElement ||
-      !rightPipeElement ||
-      !leftPipeElement ||
-      !pressPlateElement
-    ) {
-      throw new Error('DomView: Missing one or more required DOM elements.');
-    }
-
+    const getEl = <T extends HTMLElement>(id: string): T => {
+      const el = doc.getElementById(id);
+      if (!el) {
+        throw new Error(`DomView: Missing DOM element #${id}`);
+      }
+      return el as T;
+    };
 
     this.motivatorThemes = MOTIVATOR_THEMES;
 
-    this.questionEl = questionElement;
-    this.answersEl = answersElement;
-    this.timerEl = timerElement;
-    this.timerClockEl = timerClockElement;
-    this.phaseLabelEl = phaseLabelElement;
-    this.questionIndexEl = questionIndexElement;
-    this.scoreFillEl = scoreFillElement;
-    this.motivatorEl = motivatorElement;
-    this.gameOverEl = gameOverElement;
-    this.timeAboveEl = timeAboveElement;
-    this.skipLearnButtonEl = skipLearnButton;
+    this.questionEl = getEl('question-text');
+    this.answersEl = getEl('answers');
+    this.timeBarFillEl = getEl('time-bar-fill');
+    this.timeBarEl = getEl('time-bar');
+    this.phaseLabelEl = getEl('phase-label');
+    this.questionIndexEl = getEl('question-index-label');
+    this.gameOverEl = getEl('game-over');
+    this.skipLearnButtonEl = getEl<HTMLButtonElement>('skip-learn-button');
+    this.replayButtonEl = getEl<HTMLButtonElement>('replay-button');
 
+    this.gameModeSimpleButtonEl = getEl<HTMLButtonElement>('game-mode-simple');
+    this.gameModeTerminatorButtonEl = getEl<HTMLButtonElement>('game-mode-terminator');
+    this.gameModeMarieButtonEl = getEl<HTMLButtonElement>('game-mode-marie');
 
-    this.marieImageEl = marieImageElement;
-    this.terminatorWrapperEl = terminatorWrapperElement;
-    this.trophyImageEl = trophyImageElement;
+    this.gameShellEl = getEl('game-shell');
+    this.menuShellEl = getEl('menu-shell');
+    this.leftPanelEl = getEl('left-panel');
+    this.scoreSectionEl = getEl('score-section');
+    this.gameHeaderEl = getEl('game-header');
 
-    this.leftPipeEl = leftPipeElement;
-    this.rightPipeEl = rightPipeElement;
-    this.pressPlateEl = pressPlateElement;
+    this.marieImageEl = getEl<HTMLImageElement>('mood-image');
+    this.terminatorWrapperEl = getEl('terminator-wrapper');
+    this.trophyImageEl = getEl<HTMLImageElement>('trophy-image');
 
-    
+    this.leftPipeEl = getEl<HTMLImageElement>('pipe-left');
+    this.rightPipeEl = getEl<HTMLImageElement>('pipe-right');
+    this.pressPlateEl = getEl<HTMLImageElement>('press-plate');
 
-    //this.terminatorPipeEl = terminatorPipeElement;
-
-
-
-    this.performanceFillEl = performanceFillElement;
-    this.gameModeSimpleButtonEl = gameModeSimpleButtonElement;
-    this.gameModeTerminatorButtonEl = gameModeTerminatorButtonElement;
-    this.gameModeMarieButtonEl = gameModeMarieButtonElement;
-    this.gameShellEl = gameShellElement;
-    this.menuShellEl = menuShellElement;
-    this.leftPanelEl = leftPanelElement;
-    this.scoreSectionEl = scoreSectionElement;
-    this.gameHeaderEl = gameHeaderElement;
-
-
+    this.replayButtonEl.onclick = () => this.onReplay?.();
     this.skipLearnButtonEl.onclick = () => this.onSkipLearn?.();
     this.gameModeSimpleButtonEl.onclick = () => this.onGameModeSelected?.(GameMode.TROPHY);
     this.gameModeTerminatorButtonEl.onclick = () => this.onGameModeSelected?.(GameMode.TERMINATOR);
     this.gameModeMarieButtonEl.onclick = () => this.onGameModeSelected?.(GameMode.MARIE);
   }
+
 
   setAnswerHandler(handler: (optionId: number) => void): void {
     this.onAnswerSelected = handler;
@@ -184,7 +109,29 @@ export class DomView {
   renderGameShell(mode: GameMode): void {
     this.gameShellEl.classList.remove('hidden');
     this.menuShellEl.classList.add('hidden');
-    this.renderMotivator(GAME_CONFIG.initialPerformanceScore, mode);
+    this.renderMotivator(0,mode);
+    this.renderScoreBlocks(GAME_CONFIG.totalQuestions);
+  }
+
+  renderScoreBlocks(totalQuestions: number){
+    for(let i = 0; i < totalQuestions; i++){
+      const scoreBlock = document.createElement('div');
+      scoreBlock.className = 'score-block';
+      this.scoreSectionEl.appendChild(scoreBlock);
+    }
+  }
+
+  resetScoreBlocks(totalQuestions: number){
+    for(let index = 0; index < totalQuestions; index++)
+    (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#e9e9ed'
+  }
+
+  updateScoreBlocks(index: number, isCorrect: boolean, phase: string){
+    if(phase === 'TEST'){
+    if(isCorrect)(this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#4CAF50';
+    else (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#E53935';}
+    else return;
+
   }
 
   renderQuestion(question: Question): void {
@@ -205,26 +152,17 @@ export class DomView {
   }
 
   renderTimer(seconds: number, fraction: number): void {
-    this.timerEl.textContent = `${seconds.toString()}s`;
     const progress = Math.max(0, Math.min(1, fraction));
-    this.timerClockEl.style.setProperty('--progress', progress.toString());
-    const isDanger = seconds <= 3;
-    this.timerClockEl.classList.toggle('timer-clock--danger', isDanger);
-    this.timerEl.classList.toggle('timer-text--danger', isDanger);
-
-    if (this.lastTimerSeconds === null || this.lastTimerSeconds !== seconds) {
-      this.timerEl.classList.remove('timer-text--pulse');
-      void this.timerEl.offsetWidth; // restart animation
-      this.timerEl.classList.add('timer-text--pulse');
-      this.lastTimerSeconds = seconds;
-    }
+    this.timeBarFillEl.style.width = `${progress * 100}%`;
+ 
+    
   }
 
   renderBlurEffect(): void {
     //if (this.isBlured) { this.leftPanelEl.style.filter = "blur(0px)"; this.isBlured = false; }
     if (this.isBlured) {
       this.isBlured = false;
-      this.scoreSectionEl.style.filter = "blur(0px)";
+      //this.scoreSectionEl.style.filter = "blur(0px)";
       this.gameHeaderEl.style.filter = "blur(0px)";
       this.currentAnswerButtons.forEach((b) => {
         b.style.filter = "blur(0px)";
@@ -232,7 +170,7 @@ export class DomView {
     }
     else if (!this.isBlured) {
       this.isBlured = true;
-      this.scoreSectionEl.style.filter = "blur(10px)";
+      //this.scoreSectionEl.style.filter = "blur(10px)";
       this.gameHeaderEl.style.filter = "blur(10px)";
       this.currentAnswerButtons.forEach((b) => {
         b.style.filter = "blur(10px)";
@@ -242,17 +180,14 @@ export class DomView {
   }
 
   renderScore(percent: number): void {
-    this.scoreFillEl.style.width = `${percent}%`;
-    const isPositiveSide = percent > 50;
-    this.scoreFillEl.classList.toggle('score-fill--positive', isPositiveSide);
-    this.motivatorEl.textContent = `Score: ${percent.toFixed(0)}%`;
+
   }
 
-  renderMotivator(percent: number, mode: GameMode): void {
+  renderMotivator(correctAnswersPercent: number, mode: GameMode): void {
 
-    if (mode == GameMode.MARIE) this.renderMarie(percent);
-    else if (mode == GameMode.TERMINATOR) this.renderTerminator(percent);
-    else if (mode == GameMode.TROPHY) this.renderTrophy(percent);
+    if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent);
+    else if (mode == GameMode.TERMINATOR) this.renderTerminator(correctAnswersPercent);
+    else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
   }
 
   setTheme(mode: GameMode): void {
@@ -273,7 +208,7 @@ export class DomView {
 
   renderGameOver(won: boolean, mode: GameMode): void {
     this.gameOverEl.textContent = won ? 'Gewonnen! 🎉' : 'Verloren 😢';
-    if (won) this.renderMotivator(100, mode);
+    if (won) this.renderMotivator(1, mode);
     if (!won) this.renderMotivator(0, mode);
     this.currentAnswerButtons.forEach((b) => {
       b.disabled = true;
@@ -295,16 +230,15 @@ export class DomView {
   }
 
   renderPhase(phase: 'LEARN' | 'TEST'): void {
-    this.phaseLabelEl.textContent = phase === 'LEARN' ? 'Phase: Lernphase' : 'Phase: Prüfphase';
+    this.phaseLabelEl.textContent = phase === 'LEARN' ? 'Lernphase' : 'Prüfphase';
     this.skipLearnButtonEl.disabled = phase !== 'LEARN';
+    if(phase === 'TEST') (this.phaseLabelEl as HTMLElement).style.color = `red`;
   }
-
-  renderTimeAbove(secondsAbove: number, fraction: number): void {
+  /*renderTimeAbove(secondsAbove: number, fraction: number): void {
     const percent = (fraction).toFixed(0);
     this.timeAboveEl.textContent = `Zeit ≥ 50%: ${secondsAbove.toFixed(1)} s (${percent} %)`;
     const percentNumber = (fraction);
-    if (percentNumber < 49)
-      this.performanceFillEl.style.height = `${2 * percentNumber}%`;
+    this.performanceFillEl.style.height = `${2 * percentNumber}%`;
     switch (true) {
       case (percentNumber >= 50):
         this.performanceFillEl.style.background = `#22c55e`;
@@ -317,19 +251,19 @@ export class DomView {
         break;
     }
     
-  }
+  }*/
 
-  private renderMarie(abovePercent: number): void {
+  private renderMarie(correctAnswersPercent: number): void {
 
     if (this.gameStart) this.setTheme(GameMode.MARIE);
 
     const marieTheme = this.motivatorThemes[GameMode.MARIE];
     let mood: string;
-    if (abovePercent <= 15) {
+    if (correctAnswersPercent <= 0.3) {
       mood = 'sauer';
-    } else if (abovePercent <= 40) {
+    } else if (correctAnswersPercent <= 0.6) {
       mood = 'enttäuscht';
-    } else if (abovePercent <= 55) {
+    } else if (correctAnswersPercent <= 0.90) {
       mood = 'zufrieden';
     } else {
       mood = 'strahlend';
@@ -344,38 +278,15 @@ export class DomView {
     this.marieImageEl.alt = `Marie Curie (${mood})`;
   }
 
-  private renderTerminator(abovePercent: number): void {
+  private renderTerminator(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TERMINATOR);
     const maxPipeHeightPx = 250;
     const startOfPressPlatePx = 240;
-    let newPipeHeight = (abovePercent/100)*maxPipeHeightPx;
+    let newPipeHeight = (correctAnswersPercent)*maxPipeHeightPx;
     if(newPipeHeight < 15) newPipeHeight = 15;
     this.rightPipeEl.style.height =  `${newPipeHeight}px`;
     this.leftPipeEl.style.height =  `${newPipeHeight}px`;
     this.pressPlateEl.style.top = `${newPipeHeight+startOfPressPlatePx}px`;
-    
-    /*const newPipeHeight = abovePercent * 10;
-    if (abovePercent > 7 && abovePercent < 40) {
-      this.terminatorPipeEl.style.height = `${newPipeHeight}px`;
-    }
-    else if (abovePercent * 10 >= 400) {
-      const maxHeight = 420;
-      const minHeight = 400;
-      if (this.performanceRecord == maxHeight) {
-        this.goUp = false;
-      }
-      else if (this.performanceRecord == minHeight) {
-        this.goUp = true;
-      }
-      if (this.goUp) {
-        this.performanceRecord += 1;
-      }
-      if (!this.goUp) {
-        this.performanceRecord -= 1;
-      }
-      const newPipeHeight = this.performanceRecord;
-      this.terminatorPipeEl.style.height = `${newPipeHeight}px`;
-    }*/
   }
 
   private renderTrophy(abovePercent: number): void {
