@@ -21,6 +21,6 @@ export const MOTIVATOR_THEMES: Record<GameMode, MotivatorTheme> = {
   [GameMode.MARIE]: {
     label: 'Marie Curie',
     introText: 'Gewinne Maries Vertrauen…',
-    marieImages: {sauer: '/assets/sauer.gif', enttäuscht: '/assets/enttäuscht.gif', neutral: '/assets/neutral.gif', zufrieden: '/assets/zufrieden.gif', strahlend: '/assets/strahlend.gif'}, 
+    marieImages: {sauer: './assets/sauer.gif', enttäuscht: './assets/enttäuscht.gif', neutral: './assets/neutral.gif', zufrieden: './assets/zufrieden.gif', strahlend: './assets/strahlend.gif'}, 
   },
 };
