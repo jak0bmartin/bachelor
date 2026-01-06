@@ -25,7 +25,6 @@ export class GameController {
   private readonly DELAY_TIME = 0;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
-  private readonly BLUR_TIME_MS = 3000;
 
   constructor() {
     this.questionHandler = new QuestionHandler(QUESTIONS);
@@ -36,14 +35,17 @@ export class GameController {
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
       this.ui.renderGameShell(mode);
-      this.start();
+      //this.start();
+      this.ui.renderExplainShell(mode);
     };
+    this.ui.onStartButtonClicked = () => this.start();
     this.config = GAME_CONFIG;
     this.scoreSystem = new ScoreSystem();
     this.timer = new TimerService(this.config.MsPerQuestion);
   }
 
   private start(): void {
+    this.ui.renderEndExplainShell();
     this.currentPhase = 'LEARN';
     this.timer.startQuestionTimer();
     this.getQuestion(this.FIRSTQU_DELAY_TIME);
@@ -58,6 +60,8 @@ export class GameController {
     this.questionHandler.resetQuestions();
     this.ui.resetScoreBlocks(this.config.totalQuestions);
     this.questionAnswered = false;
+    this.ui.hideReplayButton();
+    this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode);
   }
 
   private stopGameloop(): void {
@@ -112,9 +116,9 @@ export class GameController {
   }
 
   private getQuestion(delay: number) {
-    this.ui.renderBlurEffect();
+    this.ui.renderBlurEffect(this.currentPhase);
     setTimeout(() => {
-      this.ui.renderBlurEffect();
+      this.ui.renderBlurEffect(this.currentPhase);
       const question = this.questionHandler.getQuestion();
       this.ui.renderQuestion(question);
       this.timer.startQuestionTimer();
@@ -155,7 +159,7 @@ export class GameController {
   private endGame(): void {
     let won = false;
     if(this.scoreSystem.getScorePercent() === 1) won = true;
-    this.ui.renderGameOver(won, this.mode);
+    this.ui.renderGameOver(won, this.mode, this.currentPhase);
   }
 
 }
