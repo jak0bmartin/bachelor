@@ -4,13 +4,6 @@ import { MotivatorTheme, MOTIVATOR_THEMES } from './MotivatorTheme';
 import { GAME_CONFIG } from '../data/GameConfig';
 
 
-type UIEvents = {
-  onAnswerSelected?: (optionId: number) => void;
-  onSkipLearn?: () => void;
-  onReplay?: () => void;
-  onGameModeSelected?: (mode: GameMode) => void;
-  onStartButtonClicked?: () => void;
-};
 
 export class DomView {
   private positiv = new Audio(`${import.meta.env.BASE_URL}assets/positiver.mp3`);

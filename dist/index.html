@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chemie Game</title>
+  <script type="module" crossorigin src="/bachelor/assets/index-Co1xQdmS.js"></script>
+  <link rel="stylesheet" crossorigin href="/bachelor/assets/index-tD1HN7o9.css">
+</head>
+
+<body>
+  <div id="explain-shell" class="hidden explain-shell">
+
+    <p id="explain-text" class="explain-text"></p>
+    <button id="start-button" class=" hidden start-button" type="button">Start</button>
+  </div>
+
+  <div id="menu-shell" class="menu-shell">
+    <div class="options">
+      <button id="game-mode-simple" class="game-mode-selector" type="button">Simple Gamification</button>
+      <button id="game-mode-terminator" class="game-mode-selector" type="button">Epic Cause: Terminator</button>
+      <button id="game-mode-marie" class="game-mode-selector" type="button">Authoritative Figure: Marie Curie</button>
+    </div>
+  </div>
+
+  <div id="game-shell" class="hidden game-shell">
+    <section class="left-panel" id="left-panel">
+      <header class="game-header" id="game-header">
+        <div>
+          <h1>Chemie Quiz</h1>
+          <div class="meta-row">
+            <span id="phase-label"></span>
+            <span id="question-index-label" class="hidden">Frage: –/–</span>
+          </div>
+        </div>
+
+        <div class="status-row">
+          <!--<div class="timer-clock" aria-label="Restzeit"><span id="timer">–</span></div>-->
+          <button id="skip-learn-button" class="skip-button" type="button">Lernphase überspringen</button>
+        </div>
+      </header>
+
+      <section class="question-section">
+        <div id="question-text" class="question-text">Frage</div>
+        <div id="time-bar" class="time-bar">
+          <div id="time-bar-fill" class="time-bar-fill"></div>
+        </div>
+        <div id="answers" class="answers"></div>
+      </section>
+
+      <section class="score-section" id="score-section">
+
+      </section>
+
+
+      <footer class="game-footer">
+        <div id="game-over" class="game-over"></div>
+        <div id="replay-wrapper" class="replay-wrapper">
+          <button id="replay-button"><img src="./assets/replay.png" /></button>
+        </div>
+      </footer>
+    </section>
+
+    <section class="right-panel" id="right-panel">
+      <div class="motivator-wrapper">
+
+        <img id="mood-image" class="mood-image" src="" />
+        <div id="terminator-wrapper" class="terminator-wrapper">
+          <div id="hydraulic-press" class="hydraulic-press">
+            <img src="./assets/press.png" id="press" />
+            <img src="./assets/pipe.png" id="pipe-left" />
+            <img src="./assets/pipe.png" id="pipe-right" />
+            <img src="./assets/press_plate.png" id="press-plate" />
+            <img src="./assets/terminator.png" id="terminator" />
+            <video id="explosion-video" muted playsinline>
+              <source src="./assets/explosion.webm" id="explosion" type="video/webm">
+            </video>
+            <!--<img src="./assets/arm.png" id="arm" />-->
+          </div>
+        </div>
+        <div id="medals-container" class="medals-container">
+          <div id="gold-medal" class="medal medal-gold"><span class="medal-number">1</span></div>
+          <div id="silver-medal" class="medal medal-silver"><span class="medal-number">2</span></div>
+          <div id="bronze-medal" class="medal medal-bronze"><span class="medal-number">3</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>
