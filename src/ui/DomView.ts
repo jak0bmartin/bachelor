@@ -13,7 +13,7 @@ type UIEvents = {
 };
 
 export class DomView {
-  private positiv = new Audio("./assets/positiver.mp3");
+  private positiv = new Audio(`${import.meta.env.BASE_URL}assets/positiver.mp3`);
   private motivatorThemes: Record<GameMode, MotivatorTheme>;
 
   private startButtonEl: HTMLButtonElement;

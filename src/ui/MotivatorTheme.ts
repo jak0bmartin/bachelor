@@ -16,11 +16,17 @@ export const MOTIVATOR_THEMES: Record<GameMode, MotivatorTheme> = {
   [GameMode.TERMINATOR]: {
     label: 'Terminator',
     introText: 'Halte den Terminator auf…',
-    images: ['/assets/terminator.png'],
+    images: [`${import.meta.env.BASE_URL}assets/terminator.png`],
   },
   [GameMode.MARIE]: {
     label: 'Marie Curie',
     introText: 'Gewinne Maries Vertrauen…',
-    marieImages: {sauer: './assets/sauer.gif', enttäuscht: './assets/enttäuscht.gif', neutral: './assets/neutral.gif', zufrieden: './assets/zufrieden.gif', strahlend: './assets/strahlend.gif'}, 
+    marieImages: {
+      sauer: `${import.meta.env.BASE_URL}assets/sauer.gif`,
+      enttäuscht: `${import.meta.env.BASE_URL}assets/enttäuscht.gif`,
+      neutral: `${import.meta.env.BASE_URL}assets/neutral.gif`,
+      zufrieden: `${import.meta.env.BASE_URL}assets/zufrieden.gif`,
+      strahlend: `${import.meta.env.BASE_URL}assets/strahlend.gif`
+    }, 
   },
 };
