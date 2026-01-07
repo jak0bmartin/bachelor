@@ -20,6 +20,7 @@ export class DomView {
   private gameOverEl: HTMLElement;
   private skipLearnButtonEl: HTMLButtonElement;
   private replayButtonEl: HTMLButtonElement;
+  private menuButtonEl: HTMLButtonElement;
   private leftPanelEl: HTMLElement;
   private explainTextEl: HTMLParagraphElement;
   private explainShellEl: HTMLElement;
@@ -80,6 +81,7 @@ export class DomView {
     this.gameOverEl = getEl('game-over');
     this.skipLearnButtonEl = getEl<HTMLButtonElement>('skip-learn-button');
     this.replayButtonEl = getEl<HTMLButtonElement>('replay-button');
+    this.menuButtonEl = getEl<HTMLButtonElement>('menu-button');
     this.startButtonEl = getEl<HTMLButtonElement>('start-button');
 
     this.gameModeSimpleButtonEl = getEl<HTMLButtonElement>('game-mode-simple');
@@ -106,6 +108,9 @@ export class DomView {
     this.explosionVideoEl = getEl<HTMLVideoElement>('explosion-video');
 
     this.replayButtonEl.onclick = () => this.onReplay?.();
+    this.menuButtonEl.onclick = () => {
+      window.location.reload();
+    };
     this.skipLearnButtonEl.onclick = () => this.onSkipLearn?.();
     this.gameModeSimpleButtonEl.onclick = () => this.onGameModeSelected?.(GameMode.TROPHY);
     this.gameModeTerminatorButtonEl.onclick = () => this.onGameModeSelected?.(GameMode.TERMINATOR);
@@ -113,6 +118,7 @@ export class DomView {
     this.startButtonEl.onclick = () => this.onStartButtonClicked?.();
 
     this.replayButtonEl.classList.add('hidden');
+    this.menuButtonEl.classList.add('hidden');
     this.explainTextEl = getEl<HTMLParagraphElement>('explain-text');
     this.explainShellEl = getEl<HTMLElement>('explain-shell');
     this.rightPanelEl = getEl<HTMLElement>('right-panel');
@@ -129,6 +135,7 @@ export class DomView {
     this.renderMotivator(0, mode);
     this.renderScoreBlocks(GAME_CONFIG.totalQuestions);
     this.replayButtonEl.classList.add('hidden');
+    this.menuButtonEl.classList.add('hidden');
     this.renderPlaceholderAnswers();
   }
 
@@ -159,14 +166,116 @@ export class DomView {
     this.explainShellEl.classList.remove('hidden');
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
-    this.startButtonEl.classList.remove('hidden');
+
+    const TIMEOUT_DURATION_CHAR = 50;
+
+    const texts: Array<{ text: string; callback?: () => void }> = [
+      {
+        text: "Marie Curie ist eine der berühmtesten Wissenschaftlerinnen der Geschichte.",
+        callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Marie gibt dir die Chance teil ihres Teams zu werden." },
+      {
+        text: "Beantworte die Fragen richtig, um ihr Vertrauen zu gewinnen.",
+        callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Beantwortest du alle Fragen richtig, bist du an Bord." },
+      { text: "Beantwortest eine Fragen falsch, bist du abgewiesen." },
+      { text: "Marie braucht exzellente Chemiker in ihrem Team!" },
+      { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
+      { text: "In der Lernphase kannst du die Fragen kennen lernen." },
+      { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      { text: "Viel Erfolg!" },
+      {
+        text: "",
+        callback: () => {
+          this.leftPanelEl.style.filter = "blur(10px)";
+          this.rightPanelEl.style.filter = "blur(10px)";
+          this.startButtonEl.classList.remove('hidden');
+        }
+      }
+    ];
+
+    this.renderExplainTexts(texts);
+
+
+  }
+
+  renderExplainTexts(texts: Array<{ text: string; callback?: () => void }>): void {
+    const TIMEOUT_DURATION_CHAR = 50;
+    let currentTime = 0;
+
+    texts.forEach((item) => {
+      const charCount = item.text.replace(/\s+/g, '').length;
+      const duration = charCount * TIMEOUT_DURATION_CHAR;
+
+      setTimeout(() => {
+        this.renderNewExplainText(item.text);
+        if (item.callback) {
+          item.callback();
+        }
+      }, currentTime);
+
+      currentTime += duration;
+    });
   }
 
   renderTrophyExplainShell(): void {
     this.explainShellEl.classList.remove('hidden');
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
-    this.startButtonEl.classList.remove('hidden');
+    this.renderNewExplainText("Hallo SpielerIn!");
+
+    const TIMEOUT_DURATION_CHAR = 50;
+
+    const texts: Array<{ text: string; callback?: () => void }> = [
+      { text: "Willkommen zum Chemie-Quiz!" },
+      {
+        text: "Sammle Auszeichnungen, indem du die Fragen richtig beantwortest.",
+        callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Je mehr Fragen du richtig beantwortest, desto höher deine Auszeichnung." },
+      {
+        text: "Beantworte die Fragen richtig, um die Auszeichnungen zu erhalten.",
+        callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Es handelt sich um Chemie-Fragen." },
+      { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
+      { text: "In der Lernphase kannst du die Fragen kennen lernen." },
+      { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      {
+        text: "Bist du gut genug, bekommst du deinen Doktortitel.",
+        callback: () => { this.bronzeMedalEl.classList.add('medal-earned'); }
+      },
+      {
+        text: "Vielleicht reicht es ja dann sogar für die Davy-Medaille.",
+        callback: () => {
+          this.bronzeMedalEl.classList.remove('medal-earned');
+          this.silverMedalEl.classList.add('medal-earned');
+        }
+      },
+      {
+        text: "Dein Ziel ist aber natürliche der Nobelpreis.",
+        callback: () => {
+          this.silverMedalEl.classList.remove('medal-earned');
+          this.goldMedalEl.classList.add('medal-earned');
+        }
+      },
+      {
+        text: "Dann schauen wir mal wie du dich schlägst!",
+        callback: () => { this.goldMedalEl.classList.remove('medal-earned'); }
+      },
+      {
+        text: "",
+        callback: () => {
+          this.leftPanelEl.style.filter = "blur(10px)";
+          this.rightPanelEl.style.filter = "blur(10px)";
+          this.startButtonEl.classList.remove('hidden');
+        }
+      }
+    ];
+
+    this.renderExplainTexts(texts);
   }
 
   renderTerminatorExplainShell(): void {
@@ -174,42 +283,42 @@ export class DomView {
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
     this.renderNewExplainText("Hallo Spieler!");
-    const TIMEOUT_DURATION = 4000;
-    setTimeout(() => {
-      this.renderNewExplainText("Es liegt an dir den Terminator zu besiegen!");
-    }, TIMEOUT_DURATION);
-    setTimeout(() => {
-      this.renderNewExplainText("Du hast es bereits geschafft ihn in eine Schrottpresse zu locken.");
-      this.rightPanelEl.style.filter = "blur(0px)";
-    }, TIMEOUT_DURATION * 2);
-    setTimeout(() => {
-      this.renderNewExplainText("Jetzt muss die Presse ihn nur noch zerquetschen...");
-    }, TIMEOUT_DURATION * 3);
-    setTimeout(() => {
-      this.renderNewExplainText("Um die Presse zu betätigen, musst du die richtige Antworten auf die Fragen kennen.");
-      this.leftPanelEl.style.filter = "blur(0px)";
-    }, TIMEOUT_DURATION * 4);
-    setTimeout(() => {
-      this.renderNewExplainText("Es handelt sich um Chemie-Fragen.");
-    }, TIMEOUT_DURATION * 5);
-    setTimeout(() => {
-      this.renderNewExplainText("Das Spiel ist in zwei Phasen unterteilt: Lernphase und Prüfphase.");
-    }, TIMEOUT_DURATION * 6);
-    setTimeout(() => {
-      this.renderNewExplainText("In der Lernphase kannst du die Fragen durchlesen und die Antworten üben.");
-    }, TIMEOUT_DURATION * 7);
-    setTimeout(() => {
-      this.renderNewExplainText("In der Prüfphase musst du die Fragen beantworten und die Zeit beachten.");
-    }, TIMEOUT_DURATION * 8);
-    setTimeout(() => {
-      this.renderNewExplainText("Viel Glück!");
-    }, TIMEOUT_DURATION * 9);
-    setTimeout(() => {
-      this.leftPanelEl.style.filter = "blur(10px)";
-      this.rightPanelEl.style.filter = "blur(10px)";
-      this.renderNewExplainText("");
-      this.startButtonEl.classList.remove('hidden');
-    }, TIMEOUT_DURATION * 10);
+
+    const TIMEOUT_DURATION_CHAR = 50;
+
+    const texts: Array<{ text: string; callback?: () => void }> = [
+      { text: "Die Menschheit ist in der Zukunft in einem bitteren Krieg zwischen" },
+      { text: "Menschen und Maschinen verwickelt." },
+      { text: "Der Terminator ist im Auftrag der Maschinen aus der Zukunft geschickt worden," },
+      { text: "um die Mutter des zukunftigen menschlichen Anführers zu töten." },
+      { text: "Und so dessen Geburt zu verhindern." },
+      { text: "Es liegt an dir den Terminator zu besiegen, SpielerIn!" },
+      {
+        text: "Du hast es bereits geschafft ihn in eine Schrottpresse zu locken.",
+        callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Jetzt muss die Presse ihn nur noch zerquetschen..." },
+      {
+        text: "Um die Presse zu betätigen, musst du die richtige Antworten auf die Fragen kennen.",
+        callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
+      },
+      { text: "Es handelt sich um Chemie-Fragen." },
+      { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
+      { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
+      { text: "Du kannst du die Fragen erst einmal kennenlernen." },
+      { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      { text: "Mach ihn fertig!" },
+      {
+        text: "",
+        callback: () => {
+          this.leftPanelEl.style.filter = "blur(10px)";
+          this.rightPanelEl.style.filter = "blur(10px)";
+          this.startButtonEl.classList.remove('hidden');
+        }
+      }
+    ];
+
+    this.renderExplainTexts(texts);
   }
 
   renderEndExplainShell(): void {
@@ -261,8 +370,8 @@ export class DomView {
   renderTimer(seconds: number, fraction: number): void {
     const progress = Math.max(0, Math.min(1, fraction));
     this.timeBarFillEl.style.width = `${progress * 100}%`;
-
-
+ 
+    
   }
 
   renderBlurEffect(phase: 'LEARN' | 'TEST' = 'LEARN'): void {
@@ -274,6 +383,7 @@ export class DomView {
       });
       this.scoreSectionEl.style.filter = "blur(0px)";
       this.replayButtonEl.style.filter = "blur(0px)";
+      this.menuButtonEl.style.filter = "blur(0px)";
     }
     else if (!this.isBlured) {
       this.isBlured = true;
@@ -284,6 +394,7 @@ export class DomView {
       if (phase === 'LEARN') {
         this.scoreSectionEl.style.filter = "blur(10px)";
         this.replayButtonEl.style.filter = "blur(10px)";
+        this.menuButtonEl.style.filter = "blur(10px)";
       }
     }
   }
@@ -297,6 +408,12 @@ export class DomView {
     if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent);
     else if (mode == GameMode.TERMINATOR) this.renderTerminator(correctAnswersPercent);
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
+  }
+
+  resetMedals(): void {
+    this.motivatorThemes[GameMode.TROPHY].bronze = false;
+    this.motivatorThemes[GameMode.TROPHY].silver = false;
+    this.motivatorThemes[GameMode.TROPHY].gold = false;
   }
 
   setTheme(mode: GameMode): void {
@@ -325,6 +442,7 @@ export class DomView {
     });
     if (phase === 'TEST') {
       this.replayButtonEl.classList.remove('hidden');
+      this.menuButtonEl.classList.remove('hidden');
     }
   }
 
@@ -352,6 +470,7 @@ export class DomView {
 
   hideReplayButton(): void {
     this.replayButtonEl.classList.add('hidden');
+    this.menuButtonEl.classList.add('hidden');
   }
 
   renderNewExplainText(text: string): void {
@@ -444,7 +563,7 @@ export class DomView {
 
   private renderTrophy(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
-
+    
     // Bronze bei 30%, Silber bei 60%, Gold bei 100%
     const bronzeThreshold = 0.3;
     const silverThreshold = 0.6;
@@ -452,12 +571,23 @@ export class DomView {
 
     if (correctAnswersPercent >= bronzeThreshold) {
       this.bronzeMedalEl.classList.add('medal-earned');
+      if (this.motivatorThemes[GameMode.TROPHY].bronze === false) {
+        console.log("Bronze");
+        const texts: Array<{ text: string; callback?: () => void }> = [{ text: "Du erhälst den Doktortitel! Herzlichen Glückwunsch!" }, { text: "" }]
+        this.renderExplainTexts(texts);
+        this.motivatorThemes[GameMode.TROPHY].bronze = true;
+      }
     } else {
       this.bronzeMedalEl.classList.remove('medal-earned');
     }
 
     if (correctAnswersPercent >= silverThreshold) {
       this.silverMedalEl.classList.add('medal-earned');
+      if (this.motivatorThemes[GameMode.TROPHY].silver === false) {
+        const texts: Array<{ text: string; callback?: () => void }> = [{ text: "Du erhälst die Davy-Medaille! Wow!" }, { text: "" }]
+        this.renderExplainTexts(texts);
+        this.motivatorThemes[GameMode.TROPHY].silver = true;
+      }
     } else {
       this.silverMedalEl.classList.remove('medal-earned');
     }

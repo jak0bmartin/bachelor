@@ -11,10 +11,9 @@
 
 <body>
   <div id="explain-shell" class="hidden explain-shell">
-
-    <p id="explain-text" class="explain-text"></p>
     <button id="start-button" class=" hidden start-button" type="button">Start</button>
   </div>
+  <p id="explain-text" class="explain-text"></p>
 
   <div id="menu-shell" class="menu-shell">
     <div class="options">
@@ -58,6 +57,7 @@
         <div id="game-over" class="game-over"></div>
         <div id="replay-wrapper" class="replay-wrapper">
           <button id="replay-button"><img src="./assets/replay.png" /></button>
+          <button id="menu-button">ANDERER<br>MODUS</button>
         </div>
       </footer>
     </section>
@@ -80,9 +80,10 @@
           </div>
         </div>
         <div id="medals-container" class="medals-container">
-          <div id="gold-medal" class="medal medal-gold"><span class="medal-number">1</span></div>
-          <div id="silver-medal" class="medal medal-silver"><span class="medal-number">2</span></div>
-          <div id="bronze-medal" class="medal medal-bronze"><span class="medal-number">3</span></div>
+            <img id="gold-medal" class="medal-image" src="./assets/nobelpreis.png" alt="Nobelpreis" />
+            <img id="silver-medal" class="medal-image" src="./assets/davypreis.png" alt="Davy Preis" />
+            <img id="bronze-medal" class="medal-image" src="./assets/doktorhut.png" alt="Doktorhut" />
+          </div>
         </div>
       </div>
     </section>

@@ -35,8 +35,8 @@ export class GameController {
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
       this.ui.renderGameShell(mode);
-      //this.start();
-      this.ui.renderExplainShell(mode);
+      this.start();
+      //this.ui.renderExplainShell(mode);
     };
     this.ui.onStartButtonClicked = () => this.start();
     this.config = GAME_CONFIG;
@@ -59,6 +59,7 @@ export class GameController {
     this.startGameLoop();
     this.questionHandler.resetQuestions();
     this.ui.resetScoreBlocks(this.config.totalQuestions);
+    this.ui.resetMedals();
     this.questionAnswered = false;
     this.ui.hideReplayButton();
     this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode);

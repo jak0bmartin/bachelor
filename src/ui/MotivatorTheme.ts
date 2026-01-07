@@ -3,6 +3,9 @@ import { GameMode } from '../data/GameConfig';
 
 export type MotivatorTheme = {
   label: string;
+  bronze?: boolean;
+  silver?: boolean;
+  gold?: boolean;
   introText?: string;
   images?: string[];
   marieImages?: Record<string, string>;
@@ -11,16 +14,16 @@ export type MotivatorTheme = {
 export const MOTIVATOR_THEMES: Record<GameMode, MotivatorTheme> = {
   [GameMode.TROPHY]: {
     label: 'Trophy',
-    introText: 'Fülle die Trophäe…',
+    bronze: false,
+    silver: false,
+    gold: false,
   },
   [GameMode.TERMINATOR]: {
     label: 'Terminator',
-    introText: 'Halte den Terminator auf…',
     images: [`${import.meta.env.BASE_URL}assets/terminator.png`],
   },
   [GameMode.MARIE]: {
     label: 'Marie Curie',
-    introText: 'Gewinne Maries Vertrauen…',
     marieImages: {
       sauer: `${import.meta.env.BASE_URL}assets/sauer.gif`,
       enttäuscht: `${import.meta.env.BASE_URL}assets/enttäuscht.gif`,
