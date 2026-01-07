@@ -35,8 +35,8 @@ export class GameController {
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
       this.ui.renderGameShell(mode);
-      this.start();
-      //this.ui.renderExplainShell(mode);
+      //this.start();
+      this.ui.renderExplainShell(mode);
     };
     this.ui.onStartButtonClicked = () => this.start();
     this.config = GAME_CONFIG;
