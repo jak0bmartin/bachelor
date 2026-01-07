@@ -22,7 +22,7 @@ export class GameController {
   private mode: GameMode = GameMode.TROPHY;
   
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME = 0;
+  private readonly DELAY_TIME = 1500;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
@@ -140,7 +140,7 @@ export class GameController {
 
     //this.performanceTracker.changePerformanceScore(this.scoreSystem.getScorePercent(), this.timer.getRemainingMs(), isAnswerCorrect);
     //this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
-    this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode);
+    this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex()+1, this.currentPhase);
 
     if(this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN'){
       this.questionHandler.setQuestionsToTestPhase();

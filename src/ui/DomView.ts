@@ -6,7 +6,13 @@ import { GAME_CONFIG } from '../data/GameConfig';
 
 
 export class DomView {
-  private positiv = new Audio(`${import.meta.env.BASE_URL}assets/positiver.mp3`);
+  private positiv1 = new Audio(`${import.meta.env.BASE_URL}assets/positiv1.mp3`);
+  private positiv2 = new Audio(`${import.meta.env.BASE_URL}assets/positiv2.mp3`);
+  private negativ1 = new Audio(`${import.meta.env.BASE_URL}assets/negativ1.mp3`);
+  private negativ2 = new Audio(`${import.meta.env.BASE_URL}assets/negativ2.mp3`);
+  private won = new Audio(`${import.meta.env.BASE_URL}assets/won.mp3`);
+  private lost = new Audio(`${import.meta.env.BASE_URL}assets/lost.mp3`);
+  private restartSound = new Audio(`${import.meta.env.BASE_URL}assets/restart.mp3`);
   private motivatorThemes: Record<GameMode, MotivatorTheme>;
 
   private startButtonEl: HTMLButtonElement;
@@ -183,8 +189,9 @@ export class DomView {
       { text: "Beantwortest eine Fragen falsch, bist du abgewiesen." },
       { text: "Marie braucht exzellente Chemiker in ihrem Team!" },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
-      { text: "In der Lernphase kannst du die Fragen kennen lernen." },
+      { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
       { text: "Viel Erfolg!" },
       {
         text: "",
@@ -241,8 +248,9 @@ export class DomView {
       },
       { text: "Es handelt sich um Chemie-Fragen." },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
-      { text: "In der Lernphase kannst du die Fragen kennen lernen." },
+      { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
       {
         text: "Bist du gut genug, bekommst du deinen Doktortitel.",
         callback: () => { this.bronzeMedalEl.classList.add('medal-earned'); }
@@ -255,7 +263,7 @@ export class DomView {
         }
       },
       {
-        text: "Dein Ziel ist aber natürliche der Nobelpreis.",
+        text: "Dein Ziel ist aber natürlich der Nobelpreis.",
         callback: () => {
           this.silverMedalEl.classList.remove('medal-earned');
           this.goldMedalEl.classList.add('medal-earned');
@@ -307,6 +315,7 @@ export class DomView {
       { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
       { text: "Du kannst du die Fragen erst einmal kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
+      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
       { text: "Mach ihn fertig!" },
       {
         text: "",
@@ -356,7 +365,14 @@ export class DomView {
     this.answersEl.innerHTML = '';
     this.currentAnswerButtons = [];
 
-    question.options.forEach((opt) => {
+    // Optionen in zufälliger Reihenfolge
+    const shuffledOptions = [...question.options];
+    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+    }
+
+    shuffledOptions.forEach((opt) => {
       const btn = document.createElement('button');
       btn.className = 'answer-button';
       btn.textContent = opt.text;
@@ -370,8 +386,8 @@ export class DomView {
   renderTimer(seconds: number, fraction: number): void {
     const progress = Math.max(0, Math.min(1, fraction));
     this.timeBarFillEl.style.width = `${progress * 100}%`;
- 
-    
+
+
   }
 
   renderBlurEffect(phase: 'LEARN' | 'TEST' = 'LEARN'): void {
@@ -403,9 +419,9 @@ export class DomView {
 
   }
 
-  renderMotivator(correctAnswersPercent: number, mode: GameMode): void {
+  renderMotivator(correctAnswersPercent: number, mode: GameMode, questionTotal?: number, questionIndex?: number, phase?: 'LEARN' | 'TEST'): void {
 
-    if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent);
+    if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent, questionTotal, questionIndex, phase);
     else if (mode == GameMode.TERMINATOR) this.renderTerminator(correctAnswersPercent);
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
   }
@@ -417,16 +433,26 @@ export class DomView {
   }
 
   renderMarieEnd(won: boolean): void {
-    if (won) this.marieImageEl.classList.add('mood-image--happy');
-    else this.marieImageEl.classList.add('mood-image--sad');
+    if (won){
+      this.renderMotivator(1, GameMode.MARIE);
+      this.won.play();
+    }
+    else{
+      this.renderMotivator(0, GameMode.MARIE);
+      this.lost.play();
+      setTimeout(() => {
+        this.restartSound.play();
+      }, 2000);
+    }
   }
 
   renderTerminatorEnd(won: boolean): void {
-    this.renderMotivator(0, GameMode.TERMINATOR);
+    if(won)this.renderMotivator(1, GameMode.TERMINATOR);
+    else this.renderMotivator(0, GameMode.TERMINATOR);
   }
 
   renderTrophyEnd(won: boolean): void {
-    
+
   }
 
   resetMedals(): void {
@@ -454,7 +480,7 @@ export class DomView {
 
   renderGameOver(won: boolean, mode: GameMode, phase: 'LEARN' | 'TEST'): void {
     this.gameOverEl.textContent = '';
-    this.renderMotivatorEnd(won,mode);
+    this.renderMotivatorEnd(won, mode);
     this.currentAnswerButtons.forEach((b) => {
       b.disabled = true;
     });
@@ -526,16 +552,28 @@ export class DomView {
     
   }*/
 
-  private renderMarie(correctAnswersPercent: number): void {
-
+  private renderMarie(correctAnswersPercent: number, questionTotal: number = 0, questionIndex: number = 0, phase?: 'LEARN' | 'TEST'): void {
     if (this.gameStart) this.setTheme(GameMode.MARIE);
+
+    if (phase === 'TEST') {
+      if (questionIndex / questionTotal == 0.3 && correctAnswersPercent < 0.3) {
+        console.log("negativ1");
+        this.negativ1.play();
+      }
+      else if(questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) this.positiv1.play();
+
+      if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
+        this.negativ2.play();
+      }
+      else if(questionIndex / questionTotal == 0.6 &&correctAnswersPercent == 0.6) this.positiv2.play();
+    }
 
     const marieTheme = this.motivatorThemes[GameMode.MARIE];
     let mood: string;
     if (correctAnswersPercent <= 0.3) {
       mood = 'sauer';
     } else if (correctAnswersPercent <= 0.6) {
-      mood = 'enttäuscht';
+      mood = 'enttauscht';
 
     } else if (correctAnswersPercent <= 0.90) {
       mood = 'zufrieden';
@@ -581,7 +619,7 @@ export class DomView {
 
   private renderTrophy(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
-    
+
     // Bronze bei 30%, Silber bei 60%, Gold bei 100%
     const bronzeThreshold = 0.3;
     const silverThreshold = 0.6;
