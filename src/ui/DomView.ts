@@ -410,6 +410,25 @@ export class DomView {
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
   }
 
+  renderMotivatorEnd(won: boolean, mode: GameMode): void {
+    if (mode == GameMode.MARIE) this.renderMarieEnd(won);
+    else if (mode == GameMode.TERMINATOR) this.renderTerminatorEnd(won);
+    else if (mode == GameMode.TROPHY) this.renderTrophyEnd(won);
+  }
+
+  renderMarieEnd(won: boolean): void {
+    if (won) this.marieImageEl.classList.add('mood-image--happy');
+    else this.marieImageEl.classList.add('mood-image--sad');
+  }
+
+  renderTerminatorEnd(won: boolean): void {
+    this.renderMotivator(0, GameMode.TERMINATOR);
+  }
+
+  renderTrophyEnd(won: boolean): void {
+    
+  }
+
   resetMedals(): void {
     this.motivatorThemes[GameMode.TROPHY].bronze = false;
     this.motivatorThemes[GameMode.TROPHY].silver = false;
@@ -435,8 +454,7 @@ export class DomView {
 
   renderGameOver(won: boolean, mode: GameMode, phase: 'LEARN' | 'TEST'): void {
     this.gameOverEl.textContent = '';
-    if (won) this.renderMotivator(1, mode);
-    if (!won) this.renderMotivator(0, mode);
+    this.renderMotivatorEnd(won,mode);
     this.currentAnswerButtons.forEach((b) => {
       b.disabled = true;
     });
