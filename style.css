@@ -779,3 +779,28 @@ body {
       width: 100%;
     }
   }*/
+
+.explain-enter-hint {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 1001;
+    animation: enterHintPulse 2s ease-in-out infinite;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes enterHintPulse {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}

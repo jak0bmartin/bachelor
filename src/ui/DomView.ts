@@ -33,6 +33,7 @@ export class DomView {
   private leftPanelEl: HTMLElement;
   private explainTextEl: HTMLParagraphElement;
   private explainShellEl: HTMLElement;
+  private explainEnterHintEl: HTMLElement;
   private explainTexts: Array<{ text: string; callback?: () => void }> = [];
   private currentExplainIndex: number = 0;
   private explainEnterHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -134,6 +135,7 @@ export class DomView {
     this.menuButtonEl.classList.add('hidden');
     this.explainTextEl = getEl<HTMLParagraphElement>('explain-text');
     this.explainShellEl = getEl<HTMLElement>('explain-shell');
+    this.explainEnterHintEl = getEl<HTMLElement>('explain-enter-hint');
     this.rightPanelEl = getEl<HTMLElement>('right-panel');
     this.pruefphaseIntroEl = getEl<HTMLElement>('prüfphase-intro');
     this.marieInfoEl = getEl<HTMLParagraphElement>('marie-info');
@@ -211,6 +213,7 @@ export class DomView {
           this.rightPanelEl.style.filter = "blur(10px)";
           this.startButtonEl.classList.remove('hidden');
           this.marieInfoEl.classList.remove('hidden');
+          this.explainEnterHintEl.classList.add('hidden');
         }
       }
     ];
@@ -228,6 +231,9 @@ export class DomView {
     if (this.explainEnterHandler) {
       document.removeEventListener('keydown', this.explainEnterHandler);
     }
+
+    // Zeige ">> drücke Enter" Hinweis
+    this.explainEnterHintEl.classList.remove('hidden');
 
     // Zeige ersten Text
     this.showNextExplainText();
@@ -248,6 +254,8 @@ export class DomView {
         document.removeEventListener('keydown', this.explainEnterHandler);
         this.explainEnterHandler = null;
       }
+      // Verstecke ">> drücke Enter" Hinweis
+      this.explainEnterHintEl.classList.add('hidden');
       return;
     }
 
@@ -311,6 +319,7 @@ export class DomView {
           this.leftPanelEl.style.filter = "blur(10px)";
           this.rightPanelEl.style.filter = "blur(10px)";
           this.startButtonEl.classList.remove('hidden');
+          this.explainEnterHintEl.classList.add('hidden');
         }
       }
     ];
@@ -355,6 +364,7 @@ export class DomView {
           this.leftPanelEl.style.filter = "blur(10px)";
           this.rightPanelEl.style.filter = "blur(10px)";
           this.startButtonEl.classList.remove('hidden');
+          this.explainEnterHintEl.classList.add('hidden');
         }
       }
     ];
