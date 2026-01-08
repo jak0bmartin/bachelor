@@ -22,7 +22,7 @@ export class GameController {
   private mode: GameMode = GameMode.TROPHY;
   
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME = 1500;
+  private readonly DELAY_TIME = 0;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
@@ -75,8 +75,12 @@ export class GameController {
   private skipLearningPhase(): void{
     this.stopGameloop();
     this.currentPhase = 'TEST';
-    this.getQuestion(this.FIRSTQU_DELAY_TIME);
-    this.questionHandler.setQuestionsToTestPhase();
+    this.ui.resetScoreBlocks(this.config.totalQuestions);
+    this.ui.renderTestPhaseIntro(this.mode);
+    setTimeout(() => {
+      this.getQuestion(this.FIRSTQU_DELAY_TIME);
+      this.questionHandler.setQuestionsToTestPhase();
+    }, 3000);
   }
 
 
@@ -145,6 +149,15 @@ export class GameController {
     if(this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN'){
       this.questionHandler.setQuestionsToTestPhase();
       this.currentPhase = 'TEST';
+      this.ui.resetScoreBlocks(this.config.totalQuestions);
+      this.ui.renderTestPhaseIntro(this.mode);
+      // Warte 3 Sekunden, dann starte die Prüfphase
+      setTimeout(() => {
+        this.questionHandler.resetQuestions();
+        this.questionAnswered = false;
+        this.getQuestion(this.DELAY_TIME);
+      }, 3000);
+      return;
     }
     else if(this.questionHandler.isLastQuestion() && this.currentPhase === 'TEST'){
       this.stopGameloop();
@@ -159,8 +172,9 @@ export class GameController {
 
   private endGame(): void {
     let won = false;
-    if(this.scoreSystem.getScorePercent() === 1) won = true;
-    this.ui.renderGameOver(won, this.mode, this.currentPhase);
+    const scorePercent = this.scoreSystem.getScorePercent();
+    if(scorePercent === 1) won = true;
+    this.ui.renderGameOver(won, this.mode, this.currentPhase, scorePercent);
   }
 
 }

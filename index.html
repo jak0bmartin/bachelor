@@ -7,23 +7,32 @@
   <title>Chemie Game</title>
   <link rel="stylesheet" href="./style.css" />
   <script type="module" src="./src/main.ts"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Changa+One" rel="stylesheet">
+
 </head>
 
 <body>
   <div id="explain-shell" class="hidden explain-shell">
     <button id="start-button" class=" hidden start-button" type="button">Start</button>
+    <p id="marie-info" class="marie-info hidden">Ton an!</p>
   </div>
   <p id="explain-text" class="explain-text"></p>
-
   <div id="menu-shell" class="menu-shell">
+    <h1 class="quiz-title">Zeit für ein Quiz!</h1>
+    <p style="color: white; font-size: 0.75rem; text-align: center; margin-bottom: 20px;">Wähle einen Spielmodus</p>
     <div class="options">
-      <button id="game-mode-simple" class="game-mode-selector" type="button">Simple Gamification</button>
-      <button id="game-mode-terminator" class="game-mode-selector" type="button">Epic Cause: Terminator</button>
-      <button id="game-mode-marie" class="game-mode-selector" type="button">Authoritative Figure: Marie Curie</button>
+      <button id="game-mode-simple" class="game-mode-selector" type="button">Bist du gut genug für den Nobelpreis?</button>
+      <button id="game-mode-terminator" class="game-mode-selector" type="button">Stoppe den Terminator!</button>
+      <button id="game-mode-marie" class="game-mode-selector" type="button">Marie Curie hasst dich! oder?</button>
     </div>
   </div>
 
   <div id="game-shell" class="hidden game-shell">
+    <div id="prüfphase-intro" class="hidden prüfphase-intro">
+      <h1 class="prüfphase-intro-text">Die Prüfphase beginnt<br>Jede Antwort zählt!</h1>
+    </div>
     <section class="left-panel" id="left-panel">
       <header class="game-header" id="game-header">
         <div>
@@ -51,15 +60,6 @@
       <section class="score-section" id="score-section">
 
       </section>
-
-
-      <footer class="game-footer">
-        <div id="game-over" class="game-over"></div>
-        <div id="replay-wrapper" class="replay-wrapper">
-          <button id="replay-button"><img src="./assets/replay.png" /></button>
-          <button id="menu-button">ANDERER<br>MODUS</button>
-        </div>
-      </footer>
     </section>
 
     <section class="right-panel" id="right-panel">
@@ -80,13 +80,21 @@
           </div>
         </div>
         <div id="medals-container" class="medals-container">
-            <img id="gold-medal" class="medal-image" src="./assets/nobelpreis.png" alt="Nobelpreis" />
-            <img id="silver-medal" class="medal-image" src="./assets/davypreis.png" alt="Davy Preis" />
-            <img id="bronze-medal" class="medal-image" src="./assets/doktorhut.png" alt="Doktorhut" />
-          </div>
+          <img id="gold-medal" class="medal-image" src="./assets/nobelpreis.png" alt="Nobelpreis" />
+          <img id="silver-medal" class="medal-image" src="./assets/davypreis.png" alt="Davy Preis" />
+          <img id="bronze-medal" class="medal-image" src="./assets/doktorhut.png" alt="Doktorhut" />
         </div>
       </div>
-    </section>
+  </div>
+  </section>
+  </div>
+
+  <div class="game-footer" style="position:absolute">
+    <div id="game-over" class="game-over"></div>
+    <div id="replay-wrapper" class="replay-wrapper">
+      <button id="replay-button"><img src="./assets/replay.png" /></button>
+      <button id="menu-button">ANDERER<br>MODUS</button>
+    </div>
   </div>
 </body>
 

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Changa+One&display=swap');
 
 *,
 *::before,
@@ -22,8 +23,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 20px 50px;
-    font-size: 1.8rem;
+    padding: 28px 70px;
+    font-size: 2.5rem;
     font-weight: 700;
     color: white;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -43,6 +44,91 @@ body {
         0 12px 30px rgba(102, 126, 234, 0.6),
         0 0 40px rgba(102, 126, 234, 0.5),
         inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.prüfphase-intro {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.quiz-title {
+    font-family: 'Changa One', cursive;
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 60px;
+    transform: rotate(-10deg);
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 30%, #c4b5fd 60%, #ddd6fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 
+        0 0 30px rgba(139, 92, 246, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+    padding: 25px 35px;
+    display: inline-block;
+    border: 3px solid #8b5cf6;
+    border-radius: 20px;
+    background-color: rgba(139, 92, 246, 0.1);
+    box-shadow: 
+        0 0 40px rgba(139, 92, 246, 0.5),
+        0 8px 25px rgba(139, 92, 246, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+
+.prüfphase-intro-text {
+    font-family: 'Changa One', cursive;
+    font-size: 4rem;
+    color: #ff3333;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 30px 40px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 51, 51, 0.1) 0%, rgba(255, 51, 51, 0.05) 100%);
+    border: 3px solid #ff3333;
+    box-shadow: 
+        0 0 40px rgba(255, 51, 51, 0.7),
+        0 10px 30px rgba(255, 51, 51, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    text-shadow: 
+        0 0 25px rgba(255, 51, 51, 0.9),
+        0 3px 6px rgba(0, 0, 0, 0.4);
+    min-width: 500px;
+    transition: all 0.3s ease;
+    margin: 0;
+    z-index: 2001;
+}
+
+.marie-info {
+    font-family: 'Changa One', cursive;
+    font-size: 2.5rem;
+    color: #ff3333;
+    text-align: center;
+    padding: 20px 30px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 51, 51, 0.15) 0%, rgba(255, 51, 51, 0.08) 100%);
+    border: 3px solid #ff3333;
+    box-shadow: 
+        0 0 35px rgba(255, 51, 51, 0.7),
+        0 8px 25px rgba(255, 51, 51, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    text-shadow: 
+        0 0 20px rgba(255, 51, 51, 0.9),
+        0 3px 6px rgba(0, 0, 0, 0.4);
+    display: inline-block;
+    min-width: 250px;
+    transition: all 0.3s ease;
+    text-decoration: none !important;
 }
 
 .game-shell {
@@ -151,8 +237,15 @@ body {
 }
 
 .game-header h1 {
-    font-size: 1.6rem;
+    font-size: 2rem;
     margin: 0;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
 }
 
 .status-row {
@@ -268,19 +361,20 @@ body {
 
 .time-bar {
     width: 100%;
-    height: 10px;
-    background: #e2e8f0;
+    height: 12px;
     border-radius: 999px;
     overflow: hidden;
     margin: 0 0 12px;
-    border: 1px solid rgba(148, 163, 184, 0.4);
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .time-bar-fill {
     height: 100%;
     width: 100%;
-    background: gray;
+    background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
     transition: width 0.08s linear;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
 }
 
 .answers {
@@ -289,20 +383,24 @@ body {
 }
 
 .answer-button {
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    color: black;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 2px solid rgba(148, 163, 184, 0.4);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #1e293b;
     cursor: pointer;
     font-size: 0.98rem;
+    font-weight: 500;
     text-align: left;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .answer-button:hover:not(:disabled) {
-    border-color: #004cff;
-    background-color: #ceddff;
-    transform: scale(1.03);
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.25);
 }
 
 .answer-button:active:not(:disabled) {
@@ -332,14 +430,13 @@ body {
 }
 
 .score-block {
-    border: 2px solid rgba(148, 163, 184, 0.3);
+    border: 2.5px solid rgba(148, 163, 184, 0.4);
     min-width: 20px;
     min-height: 20px;
     flex: 1;
-    border-radius: 4px;
-    background-color: rgba(241, 245, 249, 0.5);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .score-bar {
@@ -392,10 +489,43 @@ body {
 }
 
 .game-over {
-    font-weight: 600;
-    font-size: 1rem;
+    font-family: 'Changa One', cursive;
+    font-size: clamp(2rem, 5vw, 4rem);
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 400;
+    padding: 20px 30px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 300px;
+    transition: all 0.3s ease;
 }
 
+.game-over.game-won {
+    color: #00d084;
+    background: linear-gradient(135deg, rgba(0, 208, 132, 0.1) 0%, rgba(0, 208, 132, 0.05) 100%);
+    border: 3px solid #00d084;
+    box-shadow: 
+        0 0 30px rgba(0, 208, 132, 0.6),
+        0 8px 24px rgba(0, 208, 132, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    text-shadow: 
+        0 0 20px rgba(0, 208, 132, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-over.game-lost {
+    color: #ff3333;
+    background: linear-gradient(135deg, rgba(255, 51, 51, 0.1) 0%, rgba(255, 51, 51, 0.05) 100%);
+    border: 3px solid #ff3333;
+    box-shadow: 
+        0 0 30px rgba(255, 51, 51, 0.6),
+        0 8px 24px rgba(255, 51, 51, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    text-shadow: 
+        0 0 20px rgba(255, 51, 51, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+}
 .options {
     display: flex;
     flex-direction: column;
@@ -408,10 +538,14 @@ body {
     background-color: white;
     height: 30px;
     transition: transform 0.1s ease;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.2rem;
 }
 
 .game-mode-selector:hover {
-    background-color: #ceddff;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%);
+    border-color: #8b5cf6;
+    color: #8b5cf6;
     cursor: pointer;
     transform: scale(1.1);
 }

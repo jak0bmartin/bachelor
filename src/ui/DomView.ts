@@ -6,13 +6,16 @@ import { GAME_CONFIG } from '../data/GameConfig';
 
 
 export class DomView {
+  private startSound = new Audio(`${import.meta.env.BASE_URL}assets/start.mp3`);
   private positiv1 = new Audio(`${import.meta.env.BASE_URL}assets/positiv1.mp3`);
   private positiv2 = new Audio(`${import.meta.env.BASE_URL}assets/positiv2.mp3`);
   private negativ1 = new Audio(`${import.meta.env.BASE_URL}assets/negativ1.mp3`);
   private negativ2 = new Audio(`${import.meta.env.BASE_URL}assets/negativ2.mp3`);
+  private negativ3 = new Audio(`${import.meta.env.BASE_URL}assets/negativ3.mp3`);
   private won = new Audio(`${import.meta.env.BASE_URL}assets/won.mp3`);
   private lost = new Audio(`${import.meta.env.BASE_URL}assets/lost.mp3`);
   private restartSound = new Audio(`${import.meta.env.BASE_URL}assets/restart.mp3`);
+  private closeLost = new Audio(`${import.meta.env.BASE_URL}assets/closeLost.mp3`);
   private motivatorThemes: Record<GameMode, MotivatorTheme>;
 
   private startButtonEl: HTMLButtonElement;
@@ -30,14 +33,18 @@ export class DomView {
   private leftPanelEl: HTMLElement;
   private explainTextEl: HTMLParagraphElement;
   private explainShellEl: HTMLElement;
+  private explainTexts: Array<{ text: string; callback?: () => void }> = [];
+  private currentExplainIndex: number = 0;
+  private explainEnterHandler: ((e: KeyboardEvent) => void) | null = null;
   private rightPanelEl: HTMLElement;
+  private pruefphaseIntroEl: HTMLElement;
 
   private marieImageEl: HTMLImageElement;
   private terminatorWrapperEl: HTMLElement;
   private bronzeMedalEl: HTMLElement;
   private silverMedalEl: HTMLElement;
   private goldMedalEl: HTMLElement;
-
+  private marieInfoEl: HTMLParagraphElement;
   private leftPipeEl: HTMLImageElement;
   private rightPipeEl: HTMLImageElement;
   private pressPlateEl: HTMLImageElement;
@@ -128,6 +135,8 @@ export class DomView {
     this.explainTextEl = getEl<HTMLParagraphElement>('explain-text');
     this.explainShellEl = getEl<HTMLElement>('explain-shell');
     this.rightPanelEl = getEl<HTMLElement>('right-panel');
+    this.pruefphaseIntroEl = getEl<HTMLElement>('prüfphase-intro');
+    this.marieInfoEl = getEl<HTMLParagraphElement>('marie-info');
   }
 
 
@@ -142,6 +151,8 @@ export class DomView {
     this.renderScoreBlocks(GAME_CONFIG.totalQuestions);
     this.replayButtonEl.classList.add('hidden');
     this.menuButtonEl.classList.add('hidden');
+    this.gameOverEl.textContent = '';
+    this.gameOverEl.classList.add('hidden');
     this.renderPlaceholderAnswers();
   }
 
@@ -199,6 +210,7 @@ export class DomView {
           this.leftPanelEl.style.filter = "blur(10px)";
           this.rightPanelEl.style.filter = "blur(10px)";
           this.startButtonEl.classList.remove('hidden');
+          this.marieInfoEl.classList.remove('hidden');
         }
       }
     ];
@@ -209,33 +221,53 @@ export class DomView {
   }
 
   renderExplainTexts(texts: Array<{ text: string; callback?: () => void }>): void {
-    const TIMEOUT_DURATION_CHAR = 50;
-    let currentTime = 0;
+    this.explainTexts = texts;
+    this.currentExplainIndex = 0;
 
-    texts.forEach((item) => {
-      const charCount = item.text.replace(/\s+/g, '').length;
-      const duration = charCount * TIMEOUT_DURATION_CHAR;
+    // Entferne alten Event-Listener falls vorhanden
+    if (this.explainEnterHandler) {
+      document.removeEventListener('keydown', this.explainEnterHandler);
+    }
 
-      setTimeout(() => {
-        this.renderNewExplainText(item.text);
-        if (item.callback) {
-          item.callback();
-        }
-      }, currentTime);
+    // Zeige ersten Text
+    this.showNextExplainText();
 
-      currentTime += duration;
-    });
+    // Füge Event-Listener für Enter hinzu
+    this.explainEnterHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        this.showNextExplainText();
+      }
+    };
+    document.addEventListener('keydown', this.explainEnterHandler);
+  }
+
+  private showNextExplainText(): void {
+    if (this.currentExplainIndex >= this.explainTexts.length) {
+      // Alle Texte durchlaufen, Event-Listener entfernen
+      if (this.explainEnterHandler) {
+        document.removeEventListener('keydown', this.explainEnterHandler);
+        this.explainEnterHandler = null;
+      }
+      return;
+    }
+
+    const item = this.explainTexts[this.currentExplainIndex];
+    this.renderNewExplainText(item.text);
+    if (item.callback) {
+      item.callback();
+    }
+    this.currentExplainIndex++;
   }
 
   renderTrophyExplainShell(): void {
     this.explainShellEl.classList.remove('hidden');
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
-    this.renderNewExplainText("Hallo SpielerIn!");
 
     const TIMEOUT_DURATION_CHAR = 50;
 
     const texts: Array<{ text: string; callback?: () => void }> = [
+      { text: "Hallo SpielerIn!" },
       { text: "Willkommen zum Chemie-Quiz!" },
       {
         text: "Sammle Auszeichnungen, indem du die Fragen richtig beantwortest.",
@@ -290,11 +322,11 @@ export class DomView {
     this.explainShellEl.classList.remove('hidden');
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
-    this.renderNewExplainText("Hallo Spieler!");
 
     const TIMEOUT_DURATION_CHAR = 50;
 
     const texts: Array<{ text: string; callback?: () => void }> = [
+      { text: "Hallo Spieler!" },
       { text: "Die Menschheit ist in der Zukunft in einem bitteren Krieg zwischen" },
       { text: "Menschen und Maschinen verwickelt." },
       { text: "Der Terminator ist im Auftrag der Maschinen aus der Zukunft geschickt worden," },
@@ -335,6 +367,12 @@ export class DomView {
     this.rightPanelEl.style.filter = "blur(0px)";
     this.renderNewExplainText("");
     this.explainShellEl.classList.add('hidden');
+    this.marieInfoEl.classList.add('hidden');
+    // Entferne Event-Listener wenn Explain-Shell beendet wird
+    if (this.explainEnterHandler) {
+      document.removeEventListener('keydown', this.explainEnterHandler);
+      this.explainEnterHandler = null;
+    }
   }
 
   renderScoreBlocks(totalQuestions: number) {
@@ -346,21 +384,33 @@ export class DomView {
   }
 
   resetScoreBlocks(totalQuestions: number) {
-    for (let index = 0; index < totalQuestions; index++)
-      (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = 'rgba(241, 245, 249, 0.5)'
+    for (let index = 0; index < totalQuestions; index++) {
+      const block = this.scoreSectionEl.children[index] as HTMLElement;
+      block.style.backgroundColor = 'rgba(241, 245, 249, 0.5)';
+      block.style.boxShadow = '';
+    }
   }
 
   updateScoreBlocks(index: number, isCorrect: boolean, phase: string) {
     if (phase === 'TEST') {
-      if (isCorrect) (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#86efac';
-      else (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#f87171';
+      if (isCorrect) {
+        const block = this.scoreSectionEl.children[index] as HTMLElement;
+        block.style.backgroundColor = '#00d084';
+        block.style.boxShadow = '0 0 16px rgba(0, 208, 132, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.4)';
+      } else {
+        const block = this.scoreSectionEl.children[index] as HTMLElement;
+        block.style.backgroundColor = '#ff3333';
+        block.style.boxShadow = '0 0 16px rgba(255, 51, 51, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.4)';
+      }
     }
-    else return;
-
+    else if (phase === 'LEARN') {
+      (this.scoreSectionEl.children[index] as HTMLElement).style.backgroundColor = '#4b5563';
+    }
   }
 
   renderQuestion(question: Question): void {
     this.gameOverEl.textContent = '';
+    this.gameOverEl.classList.add('hidden');
     this.questionEl.textContent = question.text;
     this.answersEl.innerHTML = '';
     this.currentAnswerButtons = [];
@@ -386,8 +436,8 @@ export class DomView {
   renderTimer(seconds: number, fraction: number): void {
     const progress = Math.max(0, Math.min(1, fraction));
     this.timeBarFillEl.style.width = `${progress * 100}%`;
-
-
+ 
+    
   }
 
   renderBlurEffect(phase: 'LEARN' | 'TEST' = 'LEARN'): void {
@@ -419,6 +469,31 @@ export class DomView {
 
   }
 
+  renderTestPhaseIntro(mode: GameMode): void {
+    // Blur beide Panels
+    this.leftPanelEl.style.filter = "blur(10px)";
+    this.rightPanelEl.style.filter = "blur(10px)";
+
+    // Deaktiviere Antwort-Buttons
+    this.currentAnswerButtons.forEach((btn) => {
+      btn.disabled = true;
+    });
+
+    // Zeige Prüfphase-Intro
+    this.pruefphaseIntroEl.classList.remove('hidden');
+
+    // Nach 3 Sekunden alles wieder normal
+    setTimeout(() => {
+      this.leftPanelEl.style.filter = "blur(0px)";
+      this.rightPanelEl.style.filter = "blur(0px)";
+      this.pruefphaseIntroEl.classList.add('hidden');
+    }, 3000);
+
+    if (mode == GameMode.MARIE) this.startSound.play();
+
+
+  }
+
   renderMotivator(correctAnswersPercent: number, mode: GameMode, questionTotal?: number, questionIndex?: number, phase?: 'LEARN' | 'TEST'): void {
 
     if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent, questionTotal, questionIndex, phase);
@@ -426,23 +501,27 @@ export class DomView {
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
   }
 
-  renderMotivatorEnd(won: boolean, mode: GameMode): void {
-    if (mode == GameMode.MARIE) this.renderMarieEnd(won);
+  renderMotivatorEnd(won: boolean, mode: GameMode, scorePercent?: number): void {
+    if (mode == GameMode.MARIE) this.renderMarieEnd(won, scorePercent);
     else if (mode == GameMode.TERMINATOR) this.renderTerminatorEnd(won);
     else if (mode == GameMode.TROPHY) this.renderTrophyEnd(won);
   }
 
-  renderMarieEnd(won: boolean): void {
+  renderMarieEnd(won: boolean, scorePercent?: number): void {
     if (won){
       this.renderMotivator(1, GameMode.MARIE);
       this.won.play();
     }
     else{
       this.renderMotivator(0, GameMode.MARIE);
-      this.lost.play();
+      if (scorePercent !== undefined && scorePercent >= 0.7) {
+        this.closeLost.play();
+      } else {
+        this.lost.play();
+      }
       setTimeout(() => {
         this.restartSound.play();
-      }, 2000);
+      }, 2500);
     }
   }
 
@@ -478,9 +557,23 @@ export class DomView {
     this.gameStart = false;
   }
 
-  renderGameOver(won: boolean, mode: GameMode, phase: 'LEARN' | 'TEST'): void {
-    this.gameOverEl.textContent = '';
-    this.renderMotivatorEnd(won, mode);
+  renderGameOver(won: boolean, mode: GameMode, phase: 'LEARN' | 'TEST', scorePercent?: number): void {
+
+    this.leftPanelEl.style.filter = "blur(10px)";
+    this.gameOverEl.classList.remove('hidden');
+    if(mode == GameMode.MARIE){
+      this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du bist nun Teil des Forschungsteams!' : 'Verloren!';
+    }
+    else if(mode == GameMode.TERMINATOR){
+      this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du hast den Terminator besiegt!' : 'Verloren! <br>Der Terminator hat dich besiegt!';
+    }
+    else if(mode == GameMode.TROPHY){
+      this.gameOverEl.innerHTML = won ? 'Fantastisch! <br>Du hast den Nobelpreis gewonnen!' : 'Verloren! <br>Für den Nobelpreis hat es leider<br>nicht gereicht..';
+    }
+    else this.gameOverEl.textContent = won ? 'Gewonnen!' : 'Verloren!';
+    this.gameOverEl.classList.remove('game-won', 'game-lost');
+    this.gameOverEl.classList.add(won ? 'game-won' : 'game-lost');
+    this.renderMotivatorEnd(won, mode, scorePercent);
     this.currentAnswerButtons.forEach((b) => {
       b.disabled = true;
     });
@@ -515,42 +608,16 @@ export class DomView {
   hideReplayButton(): void {
     this.replayButtonEl.classList.add('hidden');
     this.menuButtonEl.classList.add('hidden');
+    this.leftPanelEl.style.filter = "blur(0px)";
+    this.rightPanelEl.style.filter = "blur(0px)";
   }
 
   renderNewExplainText(text: string): void {
-    // Animation stoppen
-    //this.explainTextEl.style.animation = 'none';
-
-    // Text setzen (während Animation gestoppt ist)
+  
     this.explainTextEl.textContent = text;
 
-    // Width zurücksetzen und Animation neu starten
-    /*setTimeout(() => {
-      this.explainTextEl.style.width = '0';
-      // Kurz warten, damit width-Reset wirksam wird
-      setTimeout(() => {
-        this.explainTextEl.style.animation = 'typewriter 3s steps(60, end) forwards';
-      }, 10);
-    }, 10);*/
+
   }
-  /*renderTimeAbove(secondsAbove: number, fraction: number): void {
-    const percent = (fraction).toFixed(0);
-    this.timeAboveEl.textContent = `Zeit ≥ 50%: ${secondsAbove.toFixed(1)} s (${percent} %)`;
-    const percentNumber = (fraction);
-    this.performanceFillEl.style.height = `${2 * percentNumber}%`;
-    switch (true) {
-      case (percentNumber >= 50):
-        this.performanceFillEl.style.background = `#22c55e`;
-        break;
-      case (percentNumber > 25):
-        this.performanceFillEl.style.background = `#f87171`;
-        break;
-      case (percentNumber > 0):
-        this.performanceFillEl.style.background = `#ef4444`;
-        break;
-    }
-    
-  }*/
 
   private renderMarie(correctAnswersPercent: number, questionTotal: number = 0, questionIndex: number = 0, phase?: 'LEARN' | 'TEST'): void {
     if (this.gameStart) this.setTheme(GameMode.MARIE);
@@ -563,7 +630,13 @@ export class DomView {
       else if(questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) this.positiv1.play();
 
       if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
-        this.negativ2.play();
+        // Wenn bei 60% der Fragen nur 2 falsch sind (4 von 6 richtig = 0.667), dann negative3
+        // 4 richtig von 6 = 4/6 = 0.667, also correctAnswersPercent >= 0.667 bedeutet nur 2 falsch
+        if (correctAnswersPercent >= 0.4) {
+          this.negativ3.play();
+        } else {
+          this.negativ2.play();
+        }
       }
       else if(questionIndex / questionTotal == 0.6 &&correctAnswersPercent == 0.6) this.positiv2.play();
     }
@@ -619,7 +692,7 @@ export class DomView {
 
   private renderTrophy(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
-
+    
     // Bronze bei 30%, Silber bei 60%, Gold bei 100%
     const bronzeThreshold = 0.3;
     const silverThreshold = 0.6;
@@ -629,8 +702,10 @@ export class DomView {
       this.bronzeMedalEl.classList.add('medal-earned');
       if (this.motivatorThemes[GameMode.TROPHY].bronze === false) {
         console.log("Bronze");
-        const texts: Array<{ text: string; callback?: () => void }> = [{ text: "Du erhälst den Doktortitel! Herzlichen Glückwunsch!" }, { text: "" }]
-        this.renderExplainTexts(texts);
+        this.renderNewExplainText("Du erhälst den Doktortitel! Herzlichen Glückwunsch!");
+        setTimeout(() => {
+          this.renderNewExplainText("");
+        }, 3000);
         this.motivatorThemes[GameMode.TROPHY].bronze = true;
       }
     } else {
@@ -640,8 +715,10 @@ export class DomView {
     if (correctAnswersPercent >= silverThreshold) {
       this.silverMedalEl.classList.add('medal-earned');
       if (this.motivatorThemes[GameMode.TROPHY].silver === false) {
-        const texts: Array<{ text: string; callback?: () => void }> = [{ text: "Du erhälst die Davy-Medaille! Wow!" }, { text: "" }]
-        this.renderExplainTexts(texts);
+        this.renderNewExplainText("Du erhälst die Davy-Medaille! Wow!");
+        setTimeout(() => {
+          this.renderNewExplainText("");
+        }, 3000);
         this.motivatorThemes[GameMode.TROPHY].silver = true;
       }
     } else {
