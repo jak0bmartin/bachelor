@@ -25,7 +25,7 @@ export interface GameConfig {
 
 // Konkrete Standardkonfiguration deines Spiels
 export const GAME_CONFIG: GameConfig = {
-  MsPerQuestion: 10000,
+  MsPerQuestion: 15000,
   totalQuestions: 10,
 };
 

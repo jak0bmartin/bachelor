@@ -204,7 +204,7 @@ export class DomView {
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
+      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
       { text: "Viel Erfolg!" },
       {
         text: "",
@@ -290,7 +290,7 @@ export class DomView {
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
+      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
       {
         text: "Bist du gut genug, bekommst du deinen Doktortitel.",
         callback: () => { this.bronzeMedalEl.classList.add('medal-earned'); }
@@ -356,7 +356,7 @@ export class DomView {
       { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
       { text: "Du kannst du die Fragen erst einmal kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 10 Sekunden Zeit." },
+      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
       { text: "Mach ihn fertig!" },
       {
         text: "",
@@ -572,7 +572,7 @@ export class DomView {
     this.leftPanelEl.style.filter = "blur(10px)";
     this.gameOverEl.classList.remove('hidden');
     if(mode == GameMode.MARIE){
-      this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du bist nun Teil des Forschungsteams!' : 'Verloren!';
+      this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du bist nun Teil des Forschungsteams!' : 'Verloren! <br> Marie braucht exzellente Chemiker!';
     }
     else if(mode == GameMode.TERMINATOR){
       this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du hast den Terminator besiegt!' : 'Verloren! <br>Der Terminator hat dich besiegt!';

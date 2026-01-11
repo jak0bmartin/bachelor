@@ -22,7 +22,7 @@ export class GameController {
   private mode: GameMode = GameMode.TROPHY;
   
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME = 1500;
+  private readonly DELAY_TIME = 2000;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
