@@ -1,6 +1,6 @@
 import { GAME_CONFIG } from '../data/GameConfig';
 import { GameConfig, Phase, GameMode } from '../data/GameConfig';
-import { Question, QUESTIONS } from '../data/Question';
+import { Question, getQuestionsForMode } from '../data/Question';
 import { ScoreSystem } from './ScoreSystem';
 import { TimerService } from './TimerService';
 import { DomView } from '../ui/DomView';
@@ -12,7 +12,7 @@ export class GameController {
   private readonly scoreSystem: ScoreSystem;
   private readonly timer: TimerService;
   private readonly ui: DomView;
-  private readonly questionHandler: QuestionHandler;
+  private questionHandler: QuestionHandler;
 
   
 
@@ -22,18 +22,21 @@ export class GameController {
   private mode: GameMode = GameMode.TROPHY;
   
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME = 2000;
+  private readonly DELAY_TIME = 0;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
   constructor() {
-    this.questionHandler = new QuestionHandler(QUESTIONS);
+    const initialQuestions = getQuestionsForMode(this.mode);
+    this.questionHandler = new QuestionHandler(initialQuestions);
     this.ui = new DomView();
     this.ui.setAnswerHandler((optionId) => this.processAnswer(optionId));
     this.ui.onSkipLearn = () => this.skipLearningPhase();
     this.ui.onReplay = () => this.restartGame();
     this.ui.onGameModeSelected = (mode: GameMode) => {
       this.mode = mode;
+      const questions = getQuestionsForMode(mode);
+      this.questionHandler = new QuestionHandler(questions);
       this.ui.renderGameShell(mode);
       //this.start();
       this.ui.renderExplainShell(mode);
@@ -45,6 +48,9 @@ export class GameController {
   }
 
   private start(): void {
+    // Lade die richtigen Fragen für den aktuellen Modus
+    const questions = getQuestionsForMode(this.mode);
+    this.questionHandler = new QuestionHandler(questions);
     this.ui.renderEndExplainShell();
     this.currentPhase = 'LEARN';
     this.timer.startQuestionTimer();
@@ -147,11 +153,15 @@ export class GameController {
     this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex()+1, this.currentPhase);
 
     if(this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN'){
-      this.questionHandler.setQuestionsToTestPhase();
-      this.currentPhase = 'TEST';
-      this.ui.resetScoreBlocks(this.config.totalQuestions);
-      this.ui.renderTestPhaseIntro(this.mode);
-      // Warte 3 Sekunden, dann starte die Prüfphase
+      // Warte DELAY_TIME, damit die richtige Antwort angezeigt wird, bevor der Prüfphase-Intro erscheint
+      setTimeout(() => {
+        this.questionHandler.setQuestionsToTestPhase();
+        this.currentPhase = 'TEST';
+        this.ui.resetScoreBlocks(this.config.totalQuestions);
+        this.ui.renderTestPhaseIntro(this.mode);
+        // Warte weitere 3 Sekunden, dann starte die Prüfphase
+        
+      }, this.DELAY_TIME);
       setTimeout(() => {
         this.questionHandler.resetQuestions();
         this.questionAnswered = false;

@@ -50,7 +50,10 @@ export class DomView {
   private rightPipeEl: HTMLImageElement;
   private pressPlateEl: HTMLImageElement;
   private terminatorEl: HTMLImageElement;
+  private torsoEl: HTMLImageElement;
   private explosionVideoEl: HTMLVideoElement;
+  private augenEl: HTMLImageElement;
+
 
   private gameModeSimpleButtonEl: HTMLButtonElement;
   private gameModeTerminatorButtonEl: HTMLButtonElement;
@@ -118,7 +121,9 @@ export class DomView {
     this.leftPipeEl = getEl<HTMLImageElement>('pipe-left');
     this.rightPipeEl = getEl<HTMLImageElement>('pipe-right');
     this.pressPlateEl = getEl<HTMLImageElement>('press-plate');
-    this.terminatorEl = getEl<HTMLImageElement>('terminator');
+    this.terminatorEl = getEl<HTMLImageElement>('kopf');
+    this.torsoEl = getEl<HTMLImageElement>('torso');
+    this.augenEl = getEl<HTMLImageElement>('augen');
     this.explosionVideoEl = getEl<HTMLVideoElement>('explosion-video');
 
     this.replayButtonEl.onclick = () => this.onReplay?.();
@@ -139,6 +144,7 @@ export class DomView {
     this.rightPanelEl = getEl<HTMLElement>('right-panel');
     this.pruefphaseIntroEl = getEl<HTMLElement>('prüfphase-intro');
     this.marieInfoEl = getEl<HTMLParagraphElement>('marie-info');
+
   }
 
 
@@ -193,18 +199,18 @@ export class DomView {
         text: "Marie Curie ist eine der berühmtesten Wissenschaftlerinnen der Geschichte.",
         callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
       },
-      { text: "Marie gibt dir die Chance teil ihres Teams zu werden." },
+      { text: "Sie gibt dir die Chance teil ihres Teams zu werden." },
       {
-        text: "Beantworte die Fragen richtig, um ihr Vertrauen zu gewinnen.",
+        text: "Beantworte die Chemie-Fragen richtig, um ihr Vertrauen zu gewinnen.",
         callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
       },
-      { text: "Beantwortest du alle Fragen richtig, bist du an Bord." },
-      { text: "Beantwortest eine Fragen falsch, bist du abgewiesen." },
+      { text: "Überzeugst du sie, bist du an Bord." },
       { text: "Marie braucht exzellente Chemiker in ihrem Team!" },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
       { text: "Für jede Frage hast du 15 Sekunden Zeit." },
+      {text: "Mache den Ton an, Marie hat etwas zu sagen!"},
       { text: "Viel Erfolg!" },
       {
         text: "",
@@ -275,8 +281,7 @@ export class DomView {
     const TIMEOUT_DURATION_CHAR = 50;
 
     const texts: Array<{ text: string; callback?: () => void }> = [
-      { text: "Hallo SpielerIn!" },
-      { text: "Willkommen zum Chemie-Quiz!" },
+      { text: "Du hast also das Zeug zum Meister-Chemiker?" },
       {
         text: "Sammle Auszeichnungen, indem du die Fragen richtig beantwortest.",
         callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
@@ -286,7 +291,6 @@ export class DomView {
         text: "Beantworte die Fragen richtig, um die Auszeichnungen zu erhalten.",
         callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
       },
-      { text: "Es handelt sich um Chemie-Fragen." },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
@@ -303,7 +307,7 @@ export class DomView {
         }
       },
       {
-        text: "Dein Ziel ist aber natürlich der Nobelpreis.",
+        text: "Dein Ziel ist aber natürlich der Nobelpreis!",
         callback: () => {
           this.silverMedalEl.classList.remove('medal-earned');
           this.goldMedalEl.classList.add('medal-earned');
@@ -335,13 +339,12 @@ export class DomView {
     const TIMEOUT_DURATION_CHAR = 50;
 
     const texts: Array<{ text: string; callback?: () => void }> = [
-      { text: "Hallo Spieler!" },
       { text: "Die Menschheit ist in der Zukunft in einem bitteren Krieg zwischen" },
       { text: "Menschen und Maschinen verwickelt." },
       { text: "Der Terminator ist im Auftrag der Maschinen aus der Zukunft geschickt worden," },
       { text: "um die Mutter des zukunftigen menschlichen Anführers zu töten." },
       { text: "Und so dessen Geburt zu verhindern." },
-      { text: "Es liegt an dir den Terminator zu besiegen, SpielerIn!" },
+      { text: "Es liegt an dir den Terminator zu besiegen!" },
       {
         text: "Du hast es bereits geschafft ihn in eine Schrottpresse zu locken.",
         callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
@@ -351,7 +354,6 @@ export class DomView {
         text: "Um die Presse zu betätigen, musst du die richtige Antworten auf die Fragen kennen.",
         callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
       },
-      { text: "Es handelt sich um Chemie-Fragen." },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
       { text: "Du kannst du die Fragen erst einmal kennenlernen." },
@@ -446,8 +448,8 @@ export class DomView {
   renderTimer(seconds: number, fraction: number): void {
     const progress = Math.max(0, Math.min(1, fraction));
     this.timeBarFillEl.style.width = `${progress * 100}%`;
- 
-    
+
+
   }
 
   renderBlurEffect(phase: 'LEARN' | 'TEST' = 'LEARN'): void {
@@ -480,14 +482,15 @@ export class DomView {
   }
 
   renderTestPhaseIntro(mode: GameMode): void {
+    // Entferne die richtige Antwort-Markierung von den Buttons
+    this.currentAnswerButtons.forEach((btn) => {
+      btn.classList.remove('answer-button--correct');
+      btn.disabled = true;
+    });
+
     // Blur beide Panels
     this.leftPanelEl.style.filter = "blur(10px)";
     this.rightPanelEl.style.filter = "blur(10px)";
-
-    // Deaktiviere Antwort-Buttons
-    this.currentAnswerButtons.forEach((btn) => {
-      btn.disabled = true;
-    });
 
     // Zeige Prüfphase-Intro
     this.pruefphaseIntroEl.classList.remove('hidden');
@@ -518,11 +521,11 @@ export class DomView {
   }
 
   renderMarieEnd(won: boolean, scorePercent?: number): void {
-    if (won){
+    if (won) {
       this.renderMotivator(1, GameMode.MARIE);
       this.won.play();
     }
-    else{
+    else {
       this.renderMotivator(0, GameMode.MARIE);
       if (scorePercent !== undefined && scorePercent >= 0.7) {
         this.closeLost.play();
@@ -536,7 +539,7 @@ export class DomView {
   }
 
   renderTerminatorEnd(won: boolean): void {
-    if(won)this.renderMotivator(1, GameMode.TERMINATOR);
+    if (won) this.renderMotivator(1, GameMode.TERMINATOR);
     else this.renderMotivator(0, GameMode.TERMINATOR);
   }
 
@@ -571,13 +574,13 @@ export class DomView {
 
     this.leftPanelEl.style.filter = "blur(10px)";
     this.gameOverEl.classList.remove('hidden');
-    if(mode == GameMode.MARIE){
+    if (mode == GameMode.MARIE) {
       this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du bist nun Teil des Forschungsteams!' : 'Verloren! <br> Marie braucht exzellente Chemiker!';
     }
-    else if(mode == GameMode.TERMINATOR){
+    else if (mode == GameMode.TERMINATOR) {
       this.gameOverEl.innerHTML = won ? 'Gewonnen! <br>Du hast den Terminator besiegt!' : 'Verloren! <br>Der Terminator hat dich besiegt!';
     }
-    else if(mode == GameMode.TROPHY){
+    else if (mode == GameMode.TROPHY) {
       this.gameOverEl.innerHTML = won ? 'Fantastisch! <br>Du hast den Nobelpreis gewonnen!' : 'Verloren! <br>Für den Nobelpreis hat es leider<br>nicht gereicht..';
     }
     else this.gameOverEl.textContent = won ? 'Gewonnen!' : 'Verloren!';
@@ -623,7 +626,7 @@ export class DomView {
   }
 
   renderNewExplainText(text: string): void {
-  
+
     this.explainTextEl.textContent = text;
 
 
@@ -637,7 +640,7 @@ export class DomView {
         console.log("negativ1");
         this.negativ1.play();
       }
-      else if(questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) this.positiv1.play();
+      else if (questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) this.positiv1.play();
 
       if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
         // Wenn bei 60% der Fragen nur 2 falsch sind (4 von 6 richtig = 0.667), dann negative3
@@ -648,7 +651,7 @@ export class DomView {
           this.negativ2.play();
         }
       }
-      else if(questionIndex / questionTotal == 0.6 &&correctAnswersPercent == 0.6) this.positiv2.play();
+      else if (questionIndex / questionTotal == 0.6 && correctAnswersPercent == 0.6) this.positiv2.play();
     }
 
     const marieTheme = this.motivatorThemes[GameMode.MARIE];
@@ -677,21 +680,29 @@ export class DomView {
     if (this.gameStart) this.setTheme(GameMode.TERMINATOR);
     const maxPipeHeightPx = 250;
     const startOfPressPlatePx = 240;
-    let newPipeHeight = (correctAnswersPercent) * maxPipeHeightPx;
+    let newPipeHeight = (correctAnswersPercent / 2.0) * maxPipeHeightPx;
+    if (correctAnswersPercent == 1) newPipeHeight = correctAnswersPercent * maxPipeHeightPx;
 
     this.rightPipeEl.style.height = `${newPipeHeight}px`;
     this.leftPipeEl.style.height = `${newPipeHeight}px`;
     this.pressPlateEl.style.top = `${newPipeHeight + startOfPressPlatePx}px`;
     console.log(newPipeHeight);
-    if (newPipeHeight < 75) this.terminatorEl.style.transform = 'scaleY(1)';
-    else if (newPipeHeight == 75) this.terminatorEl.style.transform = 'scaleY(0.9)';
-    else if (newPipeHeight == 100) this.terminatorEl.style.transform = 'scaleY(0.85)';
-    else if (newPipeHeight == 125) this.terminatorEl.style.transform = 'scaleY(0.8)';
-    else if (newPipeHeight == 150) this.terminatorEl.style.transform = 'scaleY(0.7) scaleX(1.2)';
-    else if (newPipeHeight == 175) this.terminatorEl.style.transform = 'scaleY(0.6) scaleX(1.3)';
-    else if (newPipeHeight == 200) this.terminatorEl.style.transform = 'scaleY(0.5) scaleX(1.35)';
-    else if (newPipeHeight == 225) this.terminatorEl.style.transform = 'scaleY(0.2) scaleX(1.4)';
-    else if (newPipeHeight == 250) this.terminatorEl.style.transform = 'scaleY(0.1) scaleX(1.45)';
+    if (newPipeHeight < 35) { this.terminatorEl.style.transition = 'transform 0.6s ease'; this.terminatorEl.style.transform = 'scaleY(1)'; this.torsoEl.style.transform = 'scaleY(1)'; this.torsoEl.style.display = 'unset'; this.terminatorEl.style.display = 'unset';this.augenEl.style.opacity = '1.0'; this.augenEl.style.transform = 'scaleY(1)'; this.augenEl.style.top = '422px';}
+    else if (newPipeHeight == 35) { this.terminatorEl.style.transform = 'scaleY(0.95)'; this.augenEl.style.opacity = '0.95'; this.augenEl.style.transform = 'scaleY(0.95)'; }
+    else if (newPipeHeight == 50) { this.terminatorEl.style.transform = 'scaleY(0.97)'; this.augenEl.style.opacity = '0.90'; this.augenEl.style.transform = 'scaleY(0.97)'; this.augenEl.style.top = '430px'; }
+    else if (newPipeHeight == 125 / 2) { this.terminatorEl.style.transform = 'scaleY(0.9)'; this.augenEl.style.opacity = '0.85'; this.augenEl.style.transform = 'scaleY(0.9)'; this.augenEl.style.top = '435px';}
+    else if (newPipeHeight == 150 / 2) { this.terminatorEl.style.transform = 'scaleY(0.80) scaleX(1.2)'; this.augenEl.style.opacity = '0.80'; this.augenEl.style.transform = 'scaleY(0.80) scaleX(1.2)'; this.augenEl.style.top = '440px';}
+    else if (newPipeHeight == 175 / 2) { this.terminatorEl.style.transform = 'scaleY(0.75) scaleX(1.3)'; this.augenEl.style.opacity = '0.75'; this.augenEl.style.transform = 'scaleY(0.75) scaleX(1.3)'; this.augenEl.style.top = '445px';}
+    else if (newPipeHeight == 200 / 2) { this.terminatorEl.style.transform = 'scaleY(0.70) scaleX(1.35)'; this.augenEl.style.opacity = '0.70'; this.augenEl.style.transform = 'scaleY(0.70) scaleX(1.35)'; this.augenEl.style.top = '450px';}
+    else if (newPipeHeight == 225 / 2) { this.terminatorEl.style.transform = 'scaleY(0.65) scaleX(1.4)'; this.augenEl.style.transform = 'scaleY(0.65) scaleX(1.4)'; this.augenEl.style.top = '455px';}
+    else if (newPipeHeight == 250) {
+      this.torsoEl.style.transform = 'scaleY(0.1)';
+      setTimeout(() => {
+        this.torsoEl.style.display = 'none';
+        this.terminatorEl.style.display = 'none';
+      }, 100);
+      this.terminatorEl.style.transform = 'scaleY(0.1) scaleX(1.45)';
+    }
 
     if (correctAnswersPercent == 1)
       setTimeout(() => {
@@ -702,7 +713,7 @@ export class DomView {
 
   private renderTrophy(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
-    
+
     // Bronze bei 30%, Silber bei 60%, Gold bei 100%
     const bronzeThreshold = 0.3;
     const silverThreshold = 0.6;
@@ -711,7 +722,6 @@ export class DomView {
     if (correctAnswersPercent >= bronzeThreshold) {
       this.bronzeMedalEl.classList.add('medal-earned');
       if (this.motivatorThemes[GameMode.TROPHY].bronze === false) {
-        console.log("Bronze");
         this.renderNewExplainText("Du erhälst den Doktortitel! Herzlichen Glückwunsch!");
         setTimeout(() => {
           this.renderNewExplainText("");
