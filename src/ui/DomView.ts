@@ -42,6 +42,7 @@ export class DomView {
 
   private marieImageEl: HTMLImageElement;
   private terminatorWrapperEl: HTMLElement;
+  private previousScorePercent: number = -1;
   private bronzeMedalEl: HTMLElement;
   private silverMedalEl: HTMLElement;
   private goldMedalEl: HTMLElement;
@@ -155,6 +156,7 @@ export class DomView {
   renderGameShell(mode: GameMode): void {
     this.gameShellEl.classList.remove('hidden');
     this.menuShellEl.classList.add('hidden');
+    this.previousScorePercent = -1; // Reset für neuen Spielstart
     this.renderMotivator(0, mode);
     this.renderScoreBlocks(GAME_CONFIG.totalQuestions);
     this.replayButtonEl.classList.add('hidden');
@@ -448,8 +450,8 @@ export class DomView {
   renderTimer(seconds: number, fraction: number): void {
     const progress = Math.max(0, Math.min(1, fraction));
     this.timeBarFillEl.style.width = `${progress * 100}%`;
-
-
+ 
+    
   }
 
   renderBlurEffect(phase: 'LEARN' | 'TEST' = 'LEARN'): void {
@@ -475,6 +477,14 @@ export class DomView {
         this.menuButtonEl.style.filter = "blur(10px)";
       }
     }
+  }
+
+  setLeftPanelBlur(blur: boolean): void {
+    this.leftPanelEl.style.filter = blur ? "blur(10px)" : "blur(0px)";
+  }
+
+  setRightPanelBlur(blur: boolean): void {
+    this.rightPanelEl.style.filter = blur ? "blur(10px)" : "blur(0px)";
   }
 
   renderScore(percent: number): void {
@@ -507,11 +517,71 @@ export class DomView {
 
   }
 
+  willMotivatorChange(correctAnswersPercent: number, mode: GameMode): boolean {
+    // Prüfe, ob sich der Motivator ändert
+    if (this.previousScorePercent === -1) {
+      return true; // Erste Änderung
+    }
+
+    if (mode === GameMode.MARIE) {
+      // Bei Marie ändert sich der Motivator nur bei bestimmten Schwellenwerten
+      const previousMood = this.getMoodForScore(this.previousScorePercent);
+      const currentMood = this.getMoodForScore(correctAnswersPercent);
+      return previousMood !== currentMood;
+    } else if (mode === GameMode.TERMINATOR) {
+      // Bei Terminator ändert sich der Motivator bei jeder Score-Änderung
+      return this.previousScorePercent !== correctAnswersPercent;
+    } else if (mode === GameMode.TROPHY) {
+      // Bei Trophy ändert sich der Motivator bei Schwellenwerten (30%, 60%, 100%)
+      const previousThreshold = this.getTrophyThreshold(this.previousScorePercent);
+      const currentThreshold = this.getTrophyThreshold(correctAnswersPercent);
+      return previousThreshold !== currentThreshold;
+    }
+    return false;
+  }
+
+  willMariePlaySound(correctAnswersPercent: number, questionTotal: number, questionIndex: number, phase?: 'LEARN' | 'TEST'): boolean {
+    // Prüfe, ob bei Marie Curie ein Sound abgespielt wird
+    if (phase !== 'TEST') return false;
+    
+    // Sound bei 30% der Fragen
+    if (questionIndex / questionTotal == 0.3) {
+      if (correctAnswersPercent < 0.3 || correctAnswersPercent == 0.3) {
+        return true;
+      }
+    }
+    
+    // Sound bei 60% der Fragen
+    if (questionIndex / questionTotal == 0.6) {
+      if (correctAnswersPercent < 0.6 || correctAnswersPercent == 0.6) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  private getMoodForScore(score: number): string {
+    if (score <= 0.3) return 'sauer';
+    else if (score <= 0.6) return 'enttauscht';
+    else if (score <= 0.90) return 'zufrieden';
+    else return 'strahlend';
+  }
+
+  private getTrophyThreshold(score: number): string {
+    if (score >= 1.0) return 'gold';
+    else if (score >= 0.6) return 'silver';
+    else if (score >= 0.3) return 'bronze';
+    else return 'none';
+  }
+
   renderMotivator(correctAnswersPercent: number, mode: GameMode, questionTotal?: number, questionIndex?: number, phase?: 'LEARN' | 'TEST'): void {
 
     if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent, questionTotal, questionIndex, phase);
     else if (mode == GameMode.TERMINATOR) this.renderTerminator(correctAnswersPercent);
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
+    
+    this.previousScorePercent = correctAnswersPercent;
   }
 
   renderMotivatorEnd(won: boolean, mode: GameMode, scorePercent?: number): void {
@@ -713,7 +783,7 @@ export class DomView {
 
   private renderTrophy(correctAnswersPercent: number): void {
     if (this.gameStart) this.setTheme(GameMode.TROPHY);
-
+    
     // Bronze bei 30%, Silber bei 60%, Gold bei 100%
     const bronzeThreshold = 0.3;
     const silverThreshold = 0.6;
@@ -722,7 +792,7 @@ export class DomView {
     if (correctAnswersPercent >= bronzeThreshold) {
       this.bronzeMedalEl.classList.add('medal-earned');
       if (this.motivatorThemes[GameMode.TROPHY].bronze === false) {
-        this.renderNewExplainText("Du erhälst den Doktortitel! Herzlichen Glückwunsch!");
+        this.renderNewExplainText("Du erhältst den Doktortitel! Herzlichen Glückwunsch!");
         setTimeout(() => {
           this.renderNewExplainText("");
         }, 3000);

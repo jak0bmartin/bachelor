@@ -14,15 +14,17 @@ export class GameController {
   private readonly ui: DomView;
   private questionHandler: QuestionHandler;
 
-  
+
 
   private tickIntervalId: number | null = null;
 
   private currentPhase: Phase = 'LEARN';
   private mode: GameMode = GameMode.TROPHY;
-  
+
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME = 0;
+  private readonly DELAY_TIME_LEFT_PANEL = 750;
+  private readonly DELAY_TIME_RIGHT_PANEL = 2000;
+  private readonly DELAY_TIME_LEARN_PHASE = 1400;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
@@ -58,7 +60,7 @@ export class GameController {
     this.startGameLoop();
   }
 
-  private restartGame(): void{
+  private restartGame(): void {
     this.scoreSystem.reset();
     this.timer.startQuestionTimer();
     this.getQuestion(this.FIRSTQU_DELAY_TIME);
@@ -78,7 +80,7 @@ export class GameController {
     }
   }
 
-  private skipLearningPhase(): void{
+  private skipLearningPhase(): void {
     this.stopGameloop();
     this.currentPhase = 'TEST';
     this.ui.resetScoreBlocks(this.config.totalQuestions);
@@ -105,18 +107,18 @@ export class GameController {
     }, 50);
   }
 
-  private uiForEveryTick(): void{
-      this.ui.renderQuestionIndex(this.questionHandler.getCurrentQuestionIndex()+1, this.questionHandler.getQuestionTotalNumber());
-      this.ui.renderPhase(this.currentPhase);
-      this.ui.renderTimer(this.timer.getRemainingMs()/1000, this.timer.getRemainingFraction());
-      //this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
-      //this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
+  private uiForEveryTick(): void {
+    this.ui.renderQuestionIndex(this.questionHandler.getCurrentQuestionIndex() + 1, this.questionHandler.getQuestionTotalNumber());
+    this.ui.renderPhase(this.currentPhase);
+    this.ui.renderTimer(this.timer.getRemainingMs() / 1000, this.timer.getRemainingFraction());
+    //this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
+    //this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
   }
 
-  private checkIfGameOver(): boolean{
+  private checkIfGameOver(): boolean {
     let isOver = false;
 
-    if(this.questionAnswered && (this.questionHandler.isLastQuestion() && this.currentPhase == 'TEST')){
+    if (this.questionAnswered && (this.questionHandler.isLastQuestion() && this.currentPhase == 'TEST')) {
       console.log("ich werde durchlaufen");
       this.stopGameloop();
       this.endGame();
@@ -143,47 +145,112 @@ export class GameController {
     this.stopGameloop();
 
     this.questionAnswered = true;
-    this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
-    this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
-    this.scoreSystem.applyAnswer(isAnswerCorrect, this.currentPhase);
-    this.ui.renderScore(this.scoreSystem.getScorePercent());
 
-    //this.performanceTracker.changePerformanceScore(this.scoreSystem.getScorePercent(), this.timer.getRemainingMs(), isAnswerCorrect);
-    //this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
-    this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex()+1, this.currentPhase);
+    if (this.currentPhase === 'TEST') {
+      // Zuerst Score aktualisieren, dann prüfen ob Motivator sich ändert
+      this.scoreSystem.applyAnswer(isAnswerCorrect, this.currentPhase);
+      const newScorePercent = this.scoreSystem.getScorePercent();
+      const motivatorWillChange = this.ui.willMotivatorChange(newScorePercent, this.mode);
+      const questionIndex = this.questionHandler.getCurrentQuestionIndex() + 1;
+      const questionTotal = this.questionHandler.getQuestionTotalNumber();
+      
+      // Prüfe, ob bei Marie Curie ein Sound abgespielt wird
+      const marieWillPlaySound = this.ui.willMariePlaySound(newScorePercent, questionTotal, questionIndex, this.currentPhase);
+      const shouldBlurLeftPanel = motivatorWillChange || (this.mode === GameMode.MARIE && marieWillPlaySound);
+      
+      // Phase 1: Korrekte Antwort anzeigen, Score-Block hinzufügen
+      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
+      this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
+      this.ui.renderScore(newScorePercent);
 
-    if(this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN'){
-      // Warte DELAY_TIME, damit die richtige Antwort angezeigt wird, bevor der Prüfphase-Intro erscheint
-      setTimeout(() => {
-        this.questionHandler.setQuestionsToTestPhase();
-        this.currentPhase = 'TEST';
-        this.ui.resetScoreBlocks(this.config.totalQuestions);
-        this.ui.renderTestPhaseIntro(this.mode);
-        // Warte weitere 3 Sekunden, dann starte die Prüfphase
-        
-      }, this.DELAY_TIME);
-      setTimeout(() => {
-        this.questionHandler.resetQuestions();
+      // Phase 2: Wenn Motivator sich ändert oder Marie Sound spielt, dann left-panel blurren
+      if (shouldBlurLeftPanel) {
+        setTimeout(() => {
+          this.ui.setLeftPanelBlur(true);
+          
+          // Bei Terminator: Warte 500ms nach dem Blur, bevor die Animation beginnt
+          const animationDelay = this.mode === GameMode.TERMINATOR ? 500 : 0;
+          
+          setTimeout(() => {
+            this.ui.renderMotivator(newScorePercent, this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex() + 1, this.currentPhase);
+
+            // Nach weiterem DELAY_TIME: Weiter zur nächsten Frage oder Spielende
+            const delayright = isAnswerCorrect ? this.DELAY_TIME_RIGHT_PANEL : 0;
+            
+            setTimeout(() => {
+              this.ui.setLeftPanelBlur(false);
+
+              if (this.questionHandler.isLastQuestion() && this.currentPhase === 'TEST') {
+                this.stopGameloop();
+                this.endGame();
+                return;
+              }
+              else {
+                this.questionHandler.setNextQuestion();
+                this.questionAnswered = false;
+                if (this.checkIfGameOver()) return;
+                this.getQuestion(0);
+              }
+            }, delayright);
+          }, animationDelay);
+        }, this.DELAY_TIME_LEFT_PANEL);
+      } else {
+        // Wenn Motivator sich nicht ändert: Richtige Antwort wird angezeigt, aber keine Blur-Effekte, keine Wartezeit für Motivator
+        // Wartezeit für die Anzeige der richtigen Antwort (sowohl bei richtigen als auch falschen Antworten)
+        setTimeout(() => {
+          this.ui.renderMotivator(newScorePercent, this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex() + 1, this.currentPhase);
+          
+          if (this.questionHandler.isLastQuestion() && this.currentPhase === 'TEST') {
+            this.stopGameloop();
+            this.endGame();
+            return;
+          }
+          else {
+            this.questionHandler.setNextQuestion();
+            this.questionAnswered = false;
+            if (this.checkIfGameOver()) return;
+            this.getQuestion(0);
+          }
+        }, this.DELAY_TIME_LEFT_PANEL);
+      }
+    } else {
+      // LEARN-Phase: Verhalten wie bisher
+      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
+      this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
+      this.scoreSystem.applyAnswer(isAnswerCorrect, this.currentPhase);
+      this.ui.renderScore(this.scoreSystem.getScorePercent());
+      this.ui.renderMotivator(this.scoreSystem.getScorePercent(), this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex() + 1, this.currentPhase);
+
+      if (this.questionHandler.isLastQuestion() && this.currentPhase === 'LEARN') {
+        // Warte DELAY_TIME, damit die richtige Antwort angezeigt wird, bevor der Prüfphase-Intro erscheint
+        setTimeout(() => {
+          this.questionHandler.setQuestionsToTestPhase();
+          this.currentPhase = 'TEST';
+          this.ui.resetScoreBlocks(this.config.totalQuestions);
+          this.ui.renderTestPhaseIntro(this.mode);
+          // Warte weitere 3 Sekunden, dann starte die Prüfphase
+
+        }, this.DELAY_TIME_LEARN_PHASE);
+        setTimeout(() => {
+          this.questionHandler.resetQuestions();
+          this.questionAnswered = false;
+          this.getQuestion(this.DELAY_TIME_LEARN_PHASE);
+        }, 3000);
+        return;
+      }
+      else {
+        this.questionHandler.setNextQuestion();
         this.questionAnswered = false;
-        this.getQuestion(this.DELAY_TIME);
-      }, 3000);
-      return;
+        if (this.checkIfGameOver()) return;
+        this.getQuestion(this.DELAY_TIME_LEARN_PHASE);
+      }
     }
-    else if(this.questionHandler.isLastQuestion() && this.currentPhase === 'TEST'){
-      this.stopGameloop();
-      this.endGame();
-      return;
-    }
-    else this.questionHandler.setNextQuestion();
-    this.questionAnswered = false;
-    if(this.checkIfGameOver()) return;
-    this.getQuestion(this.DELAY_TIME);
   }
 
   private endGame(): void {
     let won = false;
     const scorePercent = this.scoreSystem.getScorePercent();
-    if(scorePercent === 1) won = true;
+    if (scorePercent === 1) won = true;
     this.ui.renderGameOver(won, this.mode, this.currentPhase, scorePercent);
   }
 
