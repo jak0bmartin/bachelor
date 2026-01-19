@@ -212,8 +212,9 @@ export class DomView {
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
-      {text: "Mache den Ton an, Marie hat etwas zu sagen!"},
+      { text: "In der Prüfphase hast du für jede Frage 15 Sekunden Zeit." },
+      { text: "In der Lernphase hast du keine Zeitbegrenzung." },
+      {text: "Mach den Ton an, Marie hat etwas zu sagen!"},
       { text: "Viel Erfolg!" },
       {
         text: "",
@@ -297,7 +298,8 @@ export class DomView {
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "In der Lernphase kannst du die Fragen kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
+      { text: "In der Prüfphase hast du für jede Frage 15 Sekunden Zeit." },
+      { text: "In der Lernphase hast du keine Zeitbegrenzung." },
       {
         text: "Bist du gut genug, bekommst du deinen Doktortitel.",
         callback: () => { this.bronzeMedalEl.classList.add('medal-earned'); }
@@ -361,7 +363,8 @@ export class DomView {
       { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
       { text: "Du kannst so die Fragen erst einmal kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
-      { text: "Für jede Frage hast du 15 Sekunden Zeit." },
+      { text: "In der Prüfphase hast du für jede Frage 15 Sekunden Zeit." },
+      { text: "In der Lernphase hast du keine Zeitbegrenzung." },
       { text: "Mach ihn fertig!" },
       {
         text: "",

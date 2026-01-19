@@ -19,14 +19,14 @@ export interface Question {
 export const QUESTIONS_TROPHY: Question[] = [
     {
         id: 1,
-        text: 'Welches chemische Element ist Natrium?',
+        text: 'Zu welcher Stoffklasse gehört Natrium?',
         options: [
             { id: 1, text: 'Gasförmiges Nichtmetall' },
             { id: 2, text: 'Edelgas' },
             { id: 3, text: 'Metall' },
         ],
         correctOptionId: 3,
-    },
+    },    
     {
         id: 2,
         text: 'Welche Aussage über Edelgase trifft zu?',
@@ -71,9 +71,9 @@ export const QUESTIONS_TROPHY: Question[] = [
         id: 6,
         text: 'Was beschreibt die Ordnungszahl eines Elements?',
         options: [
-            { id: 1, text: 'Die Elektronenzahl im Atomkern.' },
-            { id: 2, text: 'Die Neutronenzahl im Atomkern.' },
-            { id: 3, text: 'Die Protonenzahl im Atomkern.' },
+            { id: 1, text: 'Die Anzahl der Elektronen in der Atomhülle eines neutralen Atoms' },
+            { id: 2, text: 'Die Anzahl der Neutronen im Atomkern' },
+            { id: 3, text: 'Die Anzahl der Protonen im Atomkern' },
         ],
         correctOptionId: 3,
     },
@@ -213,11 +213,11 @@ export const QUESTIONS_TERMINATOR: Question[] = [
     },
     {
         id: 20,
-        text: 'Was ist die Valenz eines Atoms?',
+        text: 'Wie nennt man die Elektronen in der äußersten Schale eines Atoms?',
         options: [
-            { id: 1, text: 'Die Anzahl der Neutronen' },
-            { id: 2, text: 'Die Anzahl der Elektronen in der äußersten Schale' },
-            { id: 3, text: 'Die Masse des Atoms' },
+            { id: 1, text: 'Kernelektronen' },
+            { id: 2, text: 'Valenzelektronen' },
+            { id: 3, text: 'Bindungselektronen' },
         ],
         correctOptionId: 2,
     },
