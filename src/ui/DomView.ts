@@ -359,7 +359,7 @@ export class DomView {
       },
       { text: "Das Quiz ist in zwei Phasen unterteilt: Lernphase und Prüfphase." },
       { text: "Falsche Antworten haben in der Lernphase keine Konsequenzen." },
-      { text: "Du kannst du die Fragen erst einmal kennenlernen." },
+      { text: "Du kannst so die Fragen erst einmal kennenlernen." },
       { text: "In der Prüfphase fließt jede Antwort in die Bewertung ein." },
       { text: "Für jede Frage hast du 15 Sekunden Zeit." },
       { text: "Mach ihn fertig!" },

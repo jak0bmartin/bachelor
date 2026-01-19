@@ -55,7 +55,7 @@ export class GameController {
     this.questionHandler = new QuestionHandler(questions);
     this.ui.renderEndExplainShell();
     this.currentPhase = 'LEARN';
-    this.timer.startQuestionTimer();
+    // Timer nicht in der LEARN-Phase starten
     this.getQuestion(this.FIRSTQU_DELAY_TIME);
     this.startGameLoop();
   }
@@ -101,7 +101,8 @@ export class GameController {
 
       this.uiForEveryTick();
 
-      if (!this.timer.hasTimeLeft()) {
+      // Timer nur in der TEST-Phase prüfen, nicht in der LEARN-Phase
+      if (this.currentPhase === 'TEST' && !this.timer.hasTimeLeft()) {
         this.processAnswer(-1);
       }
     }, 50);
@@ -110,7 +111,13 @@ export class GameController {
   private uiForEveryTick(): void {
     this.ui.renderQuestionIndex(this.questionHandler.getCurrentQuestionIndex() + 1, this.questionHandler.getQuestionTotalNumber());
     this.ui.renderPhase(this.currentPhase);
-    this.ui.renderTimer(this.timer.getRemainingMs() / 1000, this.timer.getRemainingFraction());
+    // Timer nur in der TEST-Phase rendern, nicht in der LEARN-Phase
+    if (this.currentPhase === 'TEST') {
+      this.ui.renderTimer(this.timer.getRemainingMs() / 1000, this.timer.getRemainingFraction());
+    } else {
+      // In der LEARN-Phase: Timer auf vollständig setzen (100%)
+      this.ui.renderTimer(0, 1);
+    }
     //this.ui.renderTimeAbove(this.performanceTracker.getPerformanceScoreMs()/1000,this.performanceTracker.getPerformanceScore());
     //this.ui.renderMotivator(this.performanceTracker.getPerformanceScore(), this.mode);
   }
@@ -134,7 +141,10 @@ export class GameController {
       this.ui.renderBlurEffect(this.currentPhase);
       const question = this.questionHandler.getQuestion();
       this.ui.renderQuestion(question);
-      this.timer.startQuestionTimer();
+      // Timer nur in der TEST-Phase starten, nicht in der LEARN-Phase
+      if (this.currentPhase === 'TEST') {
+        this.timer.startQuestionTimer();
+      }
       //this.questionAnswered = false;
       this.startGameLoop();
     }, delay);
