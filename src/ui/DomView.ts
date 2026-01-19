@@ -593,7 +593,22 @@ export class DomView {
 
   renderMarieEnd(won: boolean, scorePercent?: number): void {
     // Am Spielende: Behalte den letzten Gesichtsausdruck, ändere ihn nicht
-    // Nur Sounds abspielen
+    // Ausnahme: Wenn mit 1, 2 oder 3 falschen Antworten verloren, dann neutral
+    if (!won && scorePercent !== undefined) {
+      // Berechne die Anzahl der falschen Antworten
+      const correctAnswers = Math.round(scorePercent * GAME_CONFIG.totalQuestions);
+      const incorrectAnswers = GAME_CONFIG.totalQuestions - correctAnswers;
+      
+      // Wenn 1, 2 oder 3 falsche Antworten: Setze Ausdruck auf neutral
+      if (incorrectAnswers >= 1 && incorrectAnswers <= 3) {
+        const marieTheme = this.motivatorThemes[GameMode.MARIE];
+        this.currentMood = 'neutral';
+        this.marieImageEl.src = marieTheme.marieImages?.['neutral'] ?? '';
+        this.marieImageEl.alt = `Marie Curie (neutral)`;
+      }
+    }
+    
+    // Sounds abspielen
     if (won) {
       this.won.play();
     }

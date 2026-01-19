@@ -23,7 +23,7 @@ export class GameController {
 
   private blurTimeoutId: number | null = null;
   private readonly DELAY_TIME_LEFT_PANEL = 750;
-  private readonly DELAY_TIME_RIGHT_PANEL = 2000;
+  private readonly DELAY_TIME_RIGHT_PANEL = 1500;
   private readonly DELAY_TIME_LEARN_PHASE = 1400;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
@@ -178,7 +178,7 @@ export class GameController {
           this.ui.setLeftPanelBlur(true);
           
           // Bei Terminator: Warte 500ms nach dem Blur, bevor die Animation beginnt
-          const animationDelay = this.mode === GameMode.TERMINATOR ? 500 : 0;
+          const animationDelay = /*this.mode === GameMode.TERMINATOR ? 500 :*/ 0;
           
           setTimeout(() => {
             this.ui.renderMotivator(newScorePercent, this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex() + 1, this.currentPhase);
