@@ -157,6 +157,7 @@ export class DomView {
     this.gameShellEl.classList.remove('hidden');
     this.menuShellEl.classList.add('hidden');
     this.previousScorePercent = -1; // Reset für neuen Spielstart
+    this.currentMood = null; // Reset für neuen Spielstart, damit neutral gesetzt wird
     this.renderMotivator(0, mode);
     this.renderScoreBlocks(GAME_CONFIG.totalQuestions);
     this.replayButtonEl.classList.add('hidden');
@@ -575,9 +576,9 @@ export class DomView {
     else return 'none';
   }
 
-  renderMotivator(correctAnswersPercent: number, mode: GameMode, questionTotal?: number, questionIndex?: number, phase?: 'LEARN' | 'TEST'): void {
+  renderMotivator(correctAnswersPercent: number, mode: GameMode, questionTotal?: number, questionIndex?: number, phase?: 'LEARN' | 'TEST', isGameEnd: boolean = false): void {
 
-    if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent, questionTotal, questionIndex, phase);
+    if (mode == GameMode.MARIE) this.renderMarie(correctAnswersPercent, questionTotal, questionIndex, phase, isGameEnd);
     else if (mode == GameMode.TERMINATOR) this.renderTerminator(correctAnswersPercent);
     else if (mode == GameMode.TROPHY) this.renderTrophy(correctAnswersPercent);
     
@@ -591,12 +592,12 @@ export class DomView {
   }
 
   renderMarieEnd(won: boolean, scorePercent?: number): void {
+    // Am Spielende: Behalte den letzten Gesichtsausdruck, ändere ihn nicht
+    // Nur Sounds abspielen
     if (won) {
-      this.renderMotivator(1, GameMode.MARIE);
       this.won.play();
     }
     else {
-      this.renderMotivator(0, GameMode.MARIE);
       if (scorePercent !== undefined && scorePercent >= 0.7) {
         this.closeLost.play();
       } else {
@@ -702,15 +703,63 @@ export class DomView {
 
   }
 
-  private renderMarie(correctAnswersPercent: number, questionTotal: number = 0, questionIndex: number = 0, phase?: 'LEARN' | 'TEST'): void {
+  private renderMarie(correctAnswersPercent: number, questionTotal: number = 0, questionIndex: number = 0, phase?: 'LEARN' | 'TEST', isGameEnd: boolean = false): void {
     if (this.gameStart) this.setTheme(GameMode.MARIE);
 
+    const marieTheme = this.motivatorThemes[GameMode.MARIE];
+    let mood: string;
+    let shouldUpdateMood = false;
+
     if (phase === 'TEST') {
+      // Berechne die Anzahl der richtigen und falschen Antworten
+      // correctAnswersPercent basiert auf GAME_CONFIG.totalQuestions, also:
+      const correctAnswers = Math.round(correctAnswersPercent * GAME_CONFIG.totalQuestions);
+      const incorrectAnswers = questionIndex - correctAnswers;
+
+      // Bestimme den Gesichtsausdruck basierend auf der Frage-Nummer
+      if (questionIndex === 0 || questionIndex === undefined) {
+        // Anfang: neutral
+        mood = 'neutral';
+        shouldUpdateMood = true;
+      } else if (questionIndex === 3) {
+        // Nach Frage 3
+        if (incorrectAnswers === 0) {
+          mood = 'zufrieden';
+        } else if (incorrectAnswers === 1) {
+          mood = 'enttauscht';
+        } else {
+          mood = 'sauer';
+        }
+        shouldUpdateMood = true;
+      } else if (questionIndex === 6) {
+        // Nach Frage 6
+        if (incorrectAnswers === 0) {
+          mood = 'strahlend';
+        } else if (incorrectAnswers === 1) {
+          mood = 'enttauscht';
+        } else {
+          mood = 'sauer';
+        }
+        shouldUpdateMood = true;
+      } else if (isGameEnd) {
+        // Am Spielende: Behalte den letzten Ausdruck
+        // mood bleibt unverändert, sollteUpdateMood bleibt false
+        return;
+      } else {
+        // Zwischen den Checkpoints: Behalte den aktuellen Ausdruck
+        return;
+      }
+
+      // Sound-Logik (nur wenn ein Sound abgespielt wird, wird der Ausdruck auch aktualisiert)
       if (questionIndex / questionTotal == 0.3 && correctAnswersPercent < 0.3) {
         console.log("negativ1");
         this.negativ1.play();
+        // Ausdruck wird bereits oben gesetzt
       }
-      else if (questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) this.positiv1.play();
+      else if (questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) {
+        this.positiv1.play();
+        // Ausdruck wird bereits oben gesetzt
+      }
 
       if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
         // Wenn bei 60% der Fragen nur 2 falsch sind (4 von 6 richtig = 0.667), dann negative3
@@ -720,30 +769,24 @@ export class DomView {
         } else {
           this.negativ2.play();
         }
+        // Ausdruck wird bereits oben gesetzt
       }
-      else if (questionIndex / questionTotal == 0.6 && correctAnswersPercent == 0.6) this.positiv2.play();
-    }
-
-    const marieTheme = this.motivatorThemes[GameMode.MARIE];
-    let mood: string;
-    if (correctAnswersPercent <= 0.3) {
-      mood = 'sauer';
-    } else if (correctAnswersPercent <= 0.6) {
-      mood = 'enttauscht';
-
-    } else if (correctAnswersPercent <= 0.90) {
-      mood = 'zufrieden';
+      else if (questionIndex / questionTotal == 0.6 && correctAnswersPercent == 0.6) {
+        this.positiv2.play();
+        // Ausdruck wird bereits oben gesetzt
+      }
     } else {
-      mood = 'strahlend';
+      // LEARN Phase: neutral
+      mood = 'neutral';
+      shouldUpdateMood = true;
     }
 
-    if (mood === this.currentMood) {
-      return;
+    // Nur aktualisieren, wenn sich der Ausdruck ändert und shouldUpdateMood true ist
+    if (shouldUpdateMood && mood !== this.currentMood) {
+      this.currentMood = mood;
+      this.marieImageEl.src = marieTheme.marieImages?.[mood] ?? '';
+      this.marieImageEl.alt = `Marie Curie (${mood})`;
     }
-    this.currentMood = mood;
-
-    this.marieImageEl.src = marieTheme.marieImages?.[mood] ?? '';
-    this.marieImageEl.alt = `Marie Curie (${mood})`;
   }
 
   private renderTerminator(correctAnswersPercent: number): void {

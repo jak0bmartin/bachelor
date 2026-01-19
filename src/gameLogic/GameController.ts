@@ -156,14 +156,23 @@ export class GameController {
       
       // Prüfe, ob bei Marie Curie ein Sound abgespielt wird
       const marieWillPlaySound = this.ui.willMariePlaySound(newScorePercent, questionTotal, questionIndex, this.currentPhase);
-      const shouldBlurLeftPanel = motivatorWillChange || (this.mode === GameMode.MARIE && marieWillPlaySound);
+      
+      // Bei Marie Curie: Blur immer nach Frage 3 und Frage 6 (nicht am Ende)
+      let shouldBlurLeftPanel: boolean;
+      if (this.mode === GameMode.MARIE) {
+        const isLastQuestion = this.questionHandler.isLastQuestion();
+        shouldBlurLeftPanel = (questionIndex === 3 || questionIndex === 6) && !isLastQuestion;
+        console.log("shouldBlurLeftPanel", shouldBlurLeftPanel);
+      } else {
+        shouldBlurLeftPanel = motivatorWillChange;
+      }
       
       // Phase 1: Korrekte Antwort anzeigen, Score-Block hinzufügen
       this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
       this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
       this.ui.renderScore(newScorePercent);
 
-      // Phase 2: Wenn Motivator sich ändert oder Marie Sound spielt, dann left-panel blurren
+      // Phase 2: Wenn Motivator sich ändert oder bei Marie nach Frage 3/6, dann left-panel blurren
       if (shouldBlurLeftPanel) {
         setTimeout(() => {
           this.ui.setLeftPanelBlur(true);
@@ -175,7 +184,10 @@ export class GameController {
             this.ui.renderMotivator(newScorePercent, this.mode, this.questionHandler.getQuestionTotalNumber(), this.questionHandler.getCurrentQuestionIndex() + 1, this.currentPhase);
 
             // Nach weiterem DELAY_TIME: Weiter zur nächsten Frage oder Spielende
-            const delayright = isAnswerCorrect ? this.DELAY_TIME_RIGHT_PANEL : 0;
+            // Bei Marie nach Frage 3/6: Immer DELAY_TIME_RIGHT_PANEL warten, auch bei falschen Antworten
+            const delayright = (this.mode === GameMode.MARIE && (questionIndex === 3 || questionIndex === 6)) 
+              ? this.DELAY_TIME_RIGHT_PANEL 
+              : (isAnswerCorrect ? this.DELAY_TIME_RIGHT_PANEL : 0);
             
             setTimeout(() => {
               this.ui.setLeftPanelBlur(false);
