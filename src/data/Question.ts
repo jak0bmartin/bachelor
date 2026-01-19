@@ -239,7 +239,7 @@ export const QUESTIONS_MARIE: Question[] = [
         id: 22,
         text: 'Was ist Radioaktivität?',
         options: [
-            { id: 1, text: 'Die Fähigkeit von Atomen, spontan Strahlung abzugeben' },
+            { id: 1, text: 'Die Eigenschaft instabiler Atomkerne, spontan Strahlung abzugeben' },
             { id: 2, text: 'Die Fähigkeit, Wärme zu leiten' },
             { id: 3, text: 'Die Fähigkeit, Elektrizität zu leiten' },
         ],

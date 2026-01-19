@@ -202,7 +202,7 @@ export class DomView {
         text: "Marie Curie ist eine der berühmtesten Wissenschaftlerinnen der Geschichte.",
         callback: () => { this.rightPanelEl.style.filter = "blur(0px)"; }
       },
-      { text: "Sie gibt dir die Chance teil ihres Teams zu werden." },
+      { text: "Sie gibt dir die Chance Teil ihres Teams zu werden." },
       {
         text: "Beantworte die Chemie-Fragen richtig, um ihr Vertrauen zu gewinnen.",
         callback: () => { this.leftPanelEl.style.filter = "blur(0px)"; }
@@ -347,8 +347,8 @@ export class DomView {
       { text: "Die Menschheit ist in der Zukunft in einem bitteren Krieg zwischen" },
       { text: "Menschen und Maschinen verwickelt." },
       { text: "Der Terminator ist im Auftrag der Maschinen aus der Zukunft geschickt worden," },
-      { text: "um die Mutter des zukunftigen menschlichen Anführers zu töten." },
-      { text: "Und so dessen Geburt zu verhindern." },
+      { text: "um die Mutter des zukunftigen menschlichen Anführers zu töten" },
+      { text: "und so dessen Geburt zu verhindern." },
       { text: "Es liegt an dir den Terminator zu besiegen!" },
       {
         text: "Du hast es bereits geschafft ihn in eine Schrottpresse zu locken.",

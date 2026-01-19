@@ -24,7 +24,7 @@ export class GameController {
   private blurTimeoutId: number | null = null;
   private readonly DELAY_TIME_LEFT_PANEL = 750;
   private readonly DELAY_TIME_RIGHT_PANEL = 1500;
-  private readonly DELAY_TIME_LEARN_PHASE = 1400;
+  private readonly DELAY_TIME_LEARN_PHASE = 2000;
   private readonly FIRSTQU_DELAY_TIME = 0;
   private questionAnswered = false;
 
