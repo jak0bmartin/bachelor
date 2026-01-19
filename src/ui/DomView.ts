@@ -613,7 +613,7 @@ export class DomView {
       this.won.play();
     }
     else {
-      if (scorePercent !== undefined && scorePercent >= 0.7) {
+      if (scorePercent !== undefined && scorePercent >= 0.6) {
         this.closeLost.play();
       } else {
         this.lost.play();
@@ -740,9 +740,13 @@ export class DomView {
         // Nach Frage 3
         if (incorrectAnswers === 0) {
           mood = 'zufrieden';
-        } else if (incorrectAnswers === 1) {
+        } else if (incorrectAnswers === 3) {
           mood = 'enttauscht';
-        } else {
+        }
+        else if (incorrectAnswers === 1 || incorrectAnswers === 2) {
+          mood = 'neutral';
+        }
+        else {
           mood = 'sauer';
         }
         shouldUpdateMood = true;
@@ -779,7 +783,7 @@ export class DomView {
       if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
         // Wenn bei 60% der Fragen nur 2 falsch sind (4 von 6 richtig = 0.667), dann negative3
         // 4 richtig von 6 = 4/6 = 0.667, also correctAnswersPercent >= 0.667 bedeutet nur 2 falsch
-        if (correctAnswersPercent >= 0.4) {
+        if (correctAnswersPercent >= 0.3) {
           this.negativ3.play();
         } else {
           this.negativ2.play();
