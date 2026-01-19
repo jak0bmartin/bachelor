@@ -750,11 +750,15 @@ export class DomView {
           mood = 'sauer';
         }
         shouldUpdateMood = true;
-      } else if (questionIndex === 6) {
-        // Nach Frage 6
+      } else if (questionIndex === 7) {
+        
         if (incorrectAnswers === 0) {
           mood = 'strahlend';
-        } else if (incorrectAnswers === 1) {
+        } 
+        else if (incorrectAnswers <= 3) {
+          mood = 'neutral';
+        }
+        else if (incorrectAnswers < 5) {
           mood = 'enttauscht';
         } else {
           mood = 'sauer';
@@ -770,17 +774,17 @@ export class DomView {
       }
 
       // Sound-Logik (nur wenn ein Sound abgespielt wird, wird der Ausdruck auch aktualisiert)
-      if (questionIndex / questionTotal == 0.3 && correctAnswersPercent < 0.3) {
+      if (questionIndex / questionTotal == 0.3 && correctAnswersPercent < 0.2) {
         console.log("negativ1");
         this.negativ1.play();
         // Ausdruck wird bereits oben gesetzt
       }
-      else if (questionIndex / questionTotal == 0.3 && correctAnswersPercent == 0.3) {
+      else if (questionIndex / questionTotal == 0.3 && correctAnswersPercent >= 0.2) {
         this.positiv1.play();
         // Ausdruck wird bereits oben gesetzt
       }
 
-      if (questionIndex / questionTotal == 0.6 && correctAnswersPercent < 0.6) {
+      if (questionIndex / questionTotal == 0.7 && correctAnswersPercent < 0.7) {
         // Wenn bei 60% der Fragen nur 2 falsch sind (4 von 6 richtig = 0.667), dann negative3
         // 4 richtig von 6 = 4/6 = 0.667, also correctAnswersPercent >= 0.667 bedeutet nur 2 falsch
         if (correctAnswersPercent >= 0.3) {
@@ -790,7 +794,7 @@ export class DomView {
         }
         // Ausdruck wird bereits oben gesetzt
       }
-      else if (questionIndex / questionTotal == 0.6 && correctAnswersPercent == 0.6) {
+      else if (questionIndex / questionTotal == 0.7 && correctAnswersPercent >= 0.5) {
         this.positiv2.play();
         // Ausdruck wird bereits oben gesetzt
       }

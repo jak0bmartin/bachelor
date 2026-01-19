@@ -161,7 +161,7 @@ export class GameController {
       let shouldBlurLeftPanel: boolean;
       if (this.mode === GameMode.MARIE) {
         const isLastQuestion = this.questionHandler.isLastQuestion();
-        shouldBlurLeftPanel = (questionIndex === 3 || questionIndex === 6) && !isLastQuestion;
+        shouldBlurLeftPanel = (questionIndex === 3 || questionIndex === 7) && !isLastQuestion;
         console.log("shouldBlurLeftPanel", shouldBlurLeftPanel);
       } else {
         shouldBlurLeftPanel = motivatorWillChange;
@@ -185,7 +185,7 @@ export class GameController {
 
             // Nach weiterem DELAY_TIME: Weiter zur nächsten Frage oder Spielende
             // Bei Marie nach Frage 3/6: Immer DELAY_TIME_RIGHT_PANEL warten, auch bei falschen Antworten
-            const delayright = (this.mode === GameMode.MARIE && (questionIndex === 3 || questionIndex === 6)) 
+            const delayright = (this.mode === GameMode.MARIE && (questionIndex === 3 || questionIndex === 7)) 
               ? this.DELAY_TIME_RIGHT_PANEL 
               : (isAnswerCorrect ? this.DELAY_TIME_RIGHT_PANEL : 0);
             
