@@ -22,7 +22,7 @@ export class GameController {
   private mode: GameMode = GameMode.TROPHY;
 
   private blurTimeoutId: number | null = null;
-  private readonly DELAY_TIME_LEFT_PANEL = 750;
+  private readonly DELAY_TIME_LEFT_PANEL = 1500;
   private readonly DELAY_TIME_RIGHT_PANEL = 1500;
   private readonly DELAY_TIME_LEARN_PHASE = 2000;
   private readonly FIRSTQU_DELAY_TIME = 0;
@@ -178,7 +178,9 @@ export class GameController {
       }
       
       // Phase 1: Korrekte Antwort anzeigen, Score-Block hinzufügen
-      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
+      // Übergebe auch die ausgewählte Antwort-ID, um falsche Antworten rot zu markieren
+      const selectedId = optionId >= 0 ? optionId : undefined;
+      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer(), selectedId);
       this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
       this.ui.renderScore(newScorePercent);
 
@@ -237,7 +239,9 @@ export class GameController {
       }
     } else {
       // LEARN-Phase: Verhalten wie bisher
-      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer());
+      // Übergebe auch die ausgewählte Antwort-ID, um falsche Antworten rot zu markieren
+      const selectedId = optionId >= 0 ? optionId : undefined;
+      this.ui.renderCorrectAnswerIndex(this.questionHandler.getCorrectAnswer(), selectedId);
       this.ui.updateScoreBlocks(this.questionHandler.getCurrentQuestionIndex(), isAnswerCorrect, this.currentPhase);
       this.scoreSystem.applyAnswer(isAnswerCorrect, this.currentPhase);
       this.ui.renderScore(this.scoreSystem.getScorePercent());

@@ -472,14 +472,21 @@ export class DomView {
     else if (!this.isBlured) {
       this.isBlured = true;
       this.gameHeaderEl.style.filter = "blur(10px)";
-      this.currentAnswerButtons.forEach((b) => {
-        b.style.filter = "blur(10px)";
-      });
+      // In der LEARN-Phase: Alle Antworten nicht bluren, damit man alle sehen kann
       if (phase === 'LEARN') {
+        this.currentAnswerButtons.forEach((b) => {
+          // Alle Antworten bleiben scharf in der LEARN-Phase
+          b.style.filter = "blur(0px)";
+        });
         this.scoreSectionEl.style.filter = "blur(10px)";
         this.replayButtonEl.style.filter = "blur(10px)";
         this.menuButtonEl.style.filter = "blur(10px)";
-      }
+      } else {
+        // In der TEST-Phase: Alle Buttons bluren
+      this.currentAnswerButtons.forEach((b) => {
+        b.style.filter = "blur(10px)";
+      });
+    }
     }
   }
 
@@ -496,9 +503,10 @@ export class DomView {
   }
 
   renderTestPhaseIntro(mode: GameMode): void {
-    // Entferne die richtige Antwort-Markierung von den Buttons
+    // Entferne die richtige und falsche Antwort-Markierung von den Buttons
     this.currentAnswerButtons.forEach((btn) => {
       btn.classList.remove('answer-button--correct');
+      btn.classList.remove('answer-button--incorrect');
       btn.disabled = true;
     });
 
@@ -685,12 +693,14 @@ export class DomView {
     }
   }
 
-  renderCorrectAnswerIndex(correctId: number): void {
+  renderCorrectAnswerIndex(correctId: number, selectedId?: number): void {
     this.currentAnswerButtons.forEach((btn) => {
       const optionId = Number((btn as HTMLButtonElement).dataset.optionId);
       (btn as HTMLButtonElement).disabled = true;
       if (optionId === correctId) {
         btn.classList.add('answer-button--correct');
+      } else if (selectedId !== undefined && optionId === selectedId && optionId !== correctId) {
+        btn.classList.add('answer-button--incorrect');
       }
     });
   }
@@ -764,7 +774,7 @@ export class DomView {
         else if (incorrectAnswers < 5) {
           mood = 'enttauscht';
         } else {
-          mood = 'sauer';
+      mood = 'sauer';
         }
         shouldUpdateMood = true;
       } else if (isGameEnd) {
@@ -809,9 +819,9 @@ export class DomView {
 
     // Nur aktualisieren, wenn sich der Ausdruck ändert und shouldUpdateMood true ist
     if (shouldUpdateMood && mood !== this.currentMood) {
-      this.currentMood = mood;
-      this.marieImageEl.src = marieTheme.marieImages?.[mood] ?? '';
-      this.marieImageEl.alt = `Marie Curie (${mood})`;
+    this.currentMood = mood;
+    this.marieImageEl.src = marieTheme.marieImages?.[mood] ?? '';
+    this.marieImageEl.alt = `Marie Curie (${mood})`;
     }
   }
 

@@ -412,6 +412,14 @@ body {
     filter: blur(0) !important;
 }
 
+.answer-button--incorrect {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+    background: linear-gradient(90deg, #fee2e2, #fef2f2);
+    opacity: 1;
+    filter: blur(0) !important;
+}
+
 .score-section {
     margin-top: 10px;
     display: flex;
